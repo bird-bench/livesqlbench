@@ -1,10 +1,6 @@
 #  LiveSQLBench <img src="materials/hku-logo.jpg" alt="HKU Logo" width="50" style="vertical-align:middle;margin-left:10px;"> <img src="materials/google-cloud-logo.png" alt="Google Cloud Logo" width="50" style="vertical-align:middle;margin-left:10px;">
 
 
-<p align="center">
-  <img src="materials/title.png" 
-       style="width: %; min-width: 100px; display: block; margin: auto; border-radius: 15px !important;">
-</p>
 
 <div style="display: flex; justify-content: center; align-items: center; gap: 10px;">
   <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.en">
@@ -23,6 +19,17 @@
     <img src="https://img.shields.io/badge/OpenAI-1.40+-beige.svg" alt="OpenAI">
   </a>
 </div>
+
+
+<p align="center">
+  <img src="materials/title.png" 
+       style="width: %; min-width: 100px; display: block; margin: auto; border-radius: 15px !important;">
+</p>
+
+## News
+
+- 📢 **[2025-05-30]** We are pleased to release [**LiveSQLBench-Base-Lite**](https://huggingface.co/datasets/birdsql/livesqlbench-base-lite), featuring 18 end-user level databases and 270 tasks (180 SELECT-only, 90 Management tasks). Each task involves unambiguous and straightforward user queries grounded in external knowledge, with medium to hard complexity SQL statements.
+
 
 ## 🚀 Overview
 
@@ -76,8 +83,11 @@ Currently, we are pleased to release **LiveSQLBench-Base-Lite**, featuring:
    - `conditions`: Indicates decimal/distinct conditions
    - `difficulty_tier`: Task difficulty (Simple, Moderate, Challenging)
 
+**Data viewer**: Explore our data through data viewer in our website [livesqlbench.ai](https://livesqlbench.ai).
 
-> To avoid data leakage by auto-crawling, certain fields (e.g., `sol_sql`, `test_cases`, `external_knowledge`) are excluded from the public dataset. For the full dataset, please email: **[📧 bird.bench25@gmail.com](mailto:bird.bench25@gmail.com)** with subject tag `[livesqlbench-base-lite GT&Test Cases]`, which will be sent automatically.
+🔐 To avoid data leakage by auto-crawling, certain fields (e.g., `sol_sql`, `test_cases`, `external_knowledge`) are excluded from the public dataset. For the full dataset, please email: **[📧 bird.bench25@gmail.com](mailto:bird.bench25@gmail.com)** with subject tag `[livesqlbench-base-lite GT&Test Cases]`, which will be sent automatically.
+
+
 
 
 ## 💨 Quick Eval
@@ -139,7 +149,7 @@ If you want the log file for each instance, you can set the `--logging` to `true
 | 🥇 1 | o3-mini | 44.81 | 0.0233 |
 | 🥈 2 | GPT-4.1 | 40.00 | 0.0336 |
 | 🥉 3 | o4-mini | 37.80 | 0.0231 |
-> More results can be found [here](https://huggingface.co/datasets/birdsql/livesqlbench-base-lite/)
+> More results can be found [here](https://livesqlbench.ai)
 
 ## 🔄 Upcoming Releases
 
