@@ -1,4 +1,4 @@
-#  <img src="materials/live_color.png" alt="LiveSQLBench Logo" width="50" style="vertical-align:bottom;margin-left:10px;"> LiveSQLBench <img src="materials/hku-logo.jpg" alt="HKU Logo" width="50" style="vertical-align:middle;margin-left:10px;"> <img src="materials/google-cloud-logo.png" alt="Google Cloud Logo" width="50" style="vertical-align:middle;margin-left:10px;">
+#  LiveSQLBench <img src="materials/hku-logo.jpg" alt="HKU Logo" width="50" style="vertical-align:middle;margin-left:10px;"> <img src="materials/google-cloud-logo.png" alt="Google Cloud Logo" width="50" style="vertical-align:middle;margin-left:10px;">
 
 
 <p align="center">
