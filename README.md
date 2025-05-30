@@ -88,7 +88,7 @@ Currently, we are pleased to release **LiveSQLBench-Base-Lite**, featuring:
 cd livesqlbench
 git clone https://huggingface.co/datasets/birdsql/livesqlbench-base-lite
 ```
-Manually replace the `livesqlbench-base-lite/livesqlbench_data.jsonl` with the one requested from the email. 
+Manually replace the `livesqlbench-base-lite/livesqlbench_data.jsonl` with the one requested from the email containing the GT, test cases, and annotated external knowledge. 
 
 ### Environment Setup
 To run the baseline code you need to install the following dependencies:
