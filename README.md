@@ -99,7 +99,7 @@ Download the dataset containing DB's hkb, column meaning, schema and the `livesq
 cd livesqlbench
 git clone https://huggingface.co/datasets/birdsql/livesqlbench-base-lite
 ```
-The dataset `livesqlbench_data.jsonl` does not contain the annotated fields. After emailing to us, you can receive a ground truth data file only containing the `instance_id`, `sol_sql`, `test_cases`, and `external_knowledge`. Please manually combine it with the `livesqlbench_data.jsonl` to get the full dataset.
+The dataset `livesqlbench_data.jsonl` does not contain the annotated fields. After **emailing** to us, you can receive a ground truth data file only containing the `instance_id`, `sol_sql`, `test_cases`, and `external_knowledge`. Please **manually combine** it with the `livesqlbench_data.jsonl` to get the full dataset.
 
 
 
