@@ -85,7 +85,7 @@ Currently, we are pleased to release **LiveSQLBench-Base-Lite**, featuring:
 
 **Data viewer**: Explore our data through data viewer in our website [livesqlbench.ai](https://livesqlbench.ai).
 
-🔐 To avoid data leakage by auto-crawling, certain fields (e.g., `sol_sql`, `test_cases`, `external_knowledge`) are excluded from the public dataset. For the full dataset, please email: **[📧 bird.bench25@gmail.com](mailto:bird.bench25@gmail.com)** with subject tag `[livesqlbench-base-lite GT&Test Cases]`, which will be sent automatically.
+🔐 To avoid data leakage by auto-crawling, certain fields (e.g., `sol_sql`, `test_cases`, `external_knowledge`) are excluded from the public dataset `livesqlbench_data.jsonl`. For the full dataset, please email: **[📧 bird.bench25@gmail.com](mailto:bird.bench25@gmail.com)** with subject tag `[livesqlbench-base-lite GT&Test Cases]`, which will be sent automatically.
 
 
 
@@ -94,11 +94,14 @@ Currently, we are pleased to release **LiveSQLBench-Base-Lite**, featuring:
 
 ### Prepare the Dataset
 
+Download the dataset containing DB's hkb, column meaning, schema and the `livesqlbench_data.jsonl` file:
 ```bash
 cd livesqlbench
 git clone https://huggingface.co/datasets/birdsql/livesqlbench-base-lite
 ```
-Manually replace the `livesqlbench-base-lite/livesqlbench_data.jsonl` with the one requested from the email containing the GT, test cases, and annotated external knowledge. 
+The dataset `livesqlbench_data.jsonl` does not contain the annotated fields. After emailing to us, you can receive a ground truth data file only containing the `instance_id`, `sol_sql`, `test_cases`, and `external_knowledge`. Please manually combine it with the `livesqlbench_data.jsonl` to get the full dataset.
+
+
 
 ### Environment Setup
 To run the baseline code you need to install the following dependencies:
