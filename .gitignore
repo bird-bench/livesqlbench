@@ -45,8 +45,10 @@ evaluation/outputs/
 # DB dumps 
 postgre_table_dumps
 
-
 # model api config 
 baseline/src/config.py
+
+# prompts data dir 
+prompts/
 
 
