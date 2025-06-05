@@ -34,3 +34,18 @@ htmlcov/
 *.tmp
 *.temp
 .cache/
+
+
+# Data dir 
+livesqlbench-base-lite
+
+# Exp outputs 
+evaluation/outputs/
+
+# DB dumps 
+postgre_table_dumps
+
+
+# model api config 
+baseline/src/config.py
+
