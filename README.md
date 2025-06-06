@@ -167,3 +167,22 @@ Want new dialects? Vote for new SQL dialects [🗳️ here](https://docs.google.
 
 ## Created By:
 BIRD Team & Google Cloud
+
+
+## Changelog
+
+<!-- summary -->
+
+<details>
+<summary>Changelog</summary>
+
+All notable changes to this project will be documented in this file.
+
+### 2025-06-06
+- SQL evaluation postprocessing improvements:
+  - Removed rounding in SQL postprocessing step
+  - Added rounding of execution results to 2 decimal places
+  - Modified comparison logic for ordered conditions:
+    - Using list comparison when "order" is True in conditions
+    - Using set comparison when "order" is False in conditions
+</details>
