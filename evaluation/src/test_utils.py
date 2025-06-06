@@ -4,6 +4,7 @@ from db_utils import perform_query_on_postgresql_databases, execute_queries
 import psycopg2
 import json
 from decimal import Decimal, ROUND_HALF_UP
+import logging
 
 
 def process_decimals(results, decimal_places):
@@ -25,12 +26,120 @@ def process_decimals(results, decimal_places):
     return rounded
 
 
-def preprocess_results(results):
+
+def remove_round_functions(sql_string):
+    """
+    Remove all ROUND() function calls from a SQL string, including nested ones.
+    This regex properly handles nested functions with commas.
+    """
+    
+    def find_matching_paren(text, start_pos):
+        """Find the position of the matching closing parenthesis."""
+        paren_count = 0
+        for i in range(start_pos, len(text)):
+            if text[i] == '(':
+                paren_count += 1
+            elif text[i] == ')':
+                paren_count -= 1
+                if paren_count == 0:
+                    return i
+        return -1
+    
+    def find_first_arg_end(text, start_pos):
+        """Find the end of the first argument, accounting for nested parentheses."""
+        paren_count = 0
+        for i in range(start_pos, len(text)):
+            if text[i] == '(':
+                paren_count += 1
+            elif text[i] == ')':
+                if paren_count == 0:
+                    return i  # End of ROUND function
+                paren_count -= 1
+            elif text[i] == ',' and paren_count == 0:
+                return i  # End of first argument
+        return len(text)
+    
+    result = sql_string
+    
+    while True:
+        # Find ROUND function (case insensitive)
+        pattern = re.compile(r'ROUND\s*\(', re.IGNORECASE)
+        match = pattern.search(result)
+        
+        if not match:
+            break
+            
+        start_pos = match.start()
+        open_paren_pos = match.end() - 1
+        
+        # Find the end of the first argument
+        first_arg_end = find_first_arg_end(result, open_paren_pos + 1)
+        
+        # Find the matching closing parenthesis
+        close_paren_pos = find_matching_paren(result, open_paren_pos)
+        
+        if close_paren_pos == -1:
+            break  # Malformed SQL, can't find closing paren
+        
+        # Extract the first argument
+        first_arg = result[open_paren_pos + 1:first_arg_end].strip()
+        
+        # Replace ROUND(...) with just the first argument
+        result = result[:start_pos] + first_arg + result[close_paren_pos + 1:]
+    
+    return result
+
+def remove_round_functions_regex(sql_string):
+    pattern = r'ROUND\s*\(([^,()]*(?:\([^()]*\)[^,()]*)*?)(?:,[^)]*)?\)'
+    while True:
+        new_result = re.sub(pattern, r'\1', sql_string, flags=re.IGNORECASE)
+        if new_result == sql_string:  # No more changes made
+            break
+        sql_string = new_result
+    return sql_string
+
+def remove_round(sql_list):
+    """
+    Remove ROUND function calls while preserving the inner expression.
+    For example: 
+    - ROUND(column, 2) -> column
+    - ROUND(ROUND(price, 2), 1) -> ROUND(price, 2) -> price (handles nested ROUNDs)
+    """
+    cleaned = []
+    for sql in sql_list:
+        result = sql
+        result = remove_round_functions(result)
+        cleaned.append(result)
+        if "ROUND" in result:
+            logging.warning(f"ROUND found in {result}")
+    return cleaned
+
+
+def process_decimals_recursive(item, decimal_places):
+    """
+    Recursively process decimals in any data structure (list, dict, tuple).
+    Returns a new structure with all decimals rounded to specified places.
+    """
+    quantizer = Decimal(1).scaleb(-decimal_places)
+    
+    if isinstance(item, Decimal):
+        return item.quantize(quantizer, rounding=ROUND_HALF_UP)
+    elif isinstance(item, float):
+        return round(item, decimal_places)
+    elif isinstance(item, (list, tuple)):
+        return type(item)(process_decimals_recursive(x, decimal_places) for x in item)
+    elif isinstance(item, dict):
+        return {k: process_decimals_recursive(v, decimal_places) for k, v in item.items()}
+    else:
+        return item
+
+def preprocess_results(results, decimal_places=2):
     """
     Process the result set:
     - Replace dates with normalized string: YYYY-MM-DD
     - Convert tuples to lists for JSON serializability
     - Convert any unhashable types (dicts, lists) to their string representation for comparison
+    - Process decimals recursively in all nested structures
     """
     processed = []
     for result in results:
@@ -38,11 +147,14 @@ def preprocess_results(results):
         for item in result:
             if isinstance(item, (date, datetime)):
                 processed_result.append(item.strftime('%Y-%m-%d'))
-            elif isinstance(item, (dict, list)):
-                # Convert unhashable types to their string representation with sorted keys
-                processed_result.append(json.dumps(item, sort_keys=True))
             else:
-                processed_result.append(item)
+                # Process decimals recursively first
+                processed_item = process_decimals_recursive(item, decimal_places)
+                if isinstance(processed_item, (dict, list)):
+                    # Convert unhashable types to their string representation with sorted keys
+                    processed_result.append(json.dumps(processed_item, sort_keys=True))
+                else:
+                    processed_result.append(processed_item)
         processed.append(tuple(processed_result))
     return processed
 
@@ -66,7 +178,7 @@ def remove_distinct(sql_list):
 
     cleaned_queries = []
     for query in sql_list:
-        tokens = query.split()
+        tokens = query.split(" ")
         filtered_tokens = []
         for token in tokens:
             # Check if this token is 'distinct' (case-insensitive)
@@ -103,13 +215,13 @@ def check_sql_function_usage(sqls, required_keywords):
 
     return 1
 
-def ex_base(pred_sqls, sol_sqls, db_name, conn, decimal_places=2):
+def ex_base(pred_sqls, sol_sqls, db_name, conn, conditions=None):
     """
     Compare result-sets of two lists of SQL queries:
     - Strip comments, DISTINCT, and ORDER BY
     - Execute
     - Normalize dates and optionally round decimals
-    - Check set equality
+    - Check equality (either ordered or unordered based on conditions)
     Return 1 on match, else 0.
     """
     if not pred_sqls or not sol_sqls:
@@ -125,12 +237,15 @@ def ex_base(pred_sqls, sol_sqls, db_name, conn, decimal_places=2):
     ground_res    = preprocess_results(ground_res)
     if not predicted_res or not ground_res:
         return 0
-
-    if decimal_places is not None:
-        predicted_res = process_decimals(predicted_res, decimal_places)
-        ground_res    = process_decimals(ground_res,    decimal_places)
-
-    return 1 if set(predicted_res) == set(ground_res) else 0
+    
+    # Check if we should compare with order
+    if conditions is not None and conditions.get("order", False):
+        # Compare as lists to preserve order
+        return 1 if predicted_res == ground_res else 0
+    else:
+        # Default: compare as sets (order doesn't matter)
+        return 1 if set(predicted_res) == set(ground_res) else 0
+    
 
 def performance_compare_by_qep(old_sqls, sol_sqls, db_name, conn):
     """
@@ -219,8 +334,8 @@ def performance_compare_by_qep(old_sqls, sol_sqls, db_name, conn):
     print(f"[performance_compare_by_qep] Compare old({old_total_cost}) vs. sol({sol_total_cost})")
     return 1 if sol_total_cost < old_total_cost else 0
 
-
-def remove_comments(sql_list):
+ 
+def remove_comments(sql_list): 
     """
     Remove all SQL comments from each query string in the list.
     - Block comments: /* ... */
@@ -239,7 +354,7 @@ def remove_comments(sql_list):
     return cleaned
 
 
-def test_case_default(pred_sqls, sol_sqls, db_name, conn, decimal_places=None):
+def test_case_default(pred_sqls, sol_sqls, db_name, conn, conditions):
     """
     Default test_case: pytest-style assertion.
     """
@@ -247,23 +362,27 @@ def test_case_default(pred_sqls, sol_sqls, db_name, conn, decimal_places=None):
     pred_sqls = remove_comments(pred_sqls)
     sol_sqls  = remove_comments(sol_sqls)
     pred_sqls = remove_distinct(pred_sqls)
-    # pred_sqls = remove_order_by(pred_sqls)
+    pred_sqls = remove_round(pred_sqls)
     sol_sqls  = remove_distinct(sol_sqls)
-    # sol_sqls  = remove_order_by(sol_sqls)
-    
-    result = ex_base(pred_sqls, sol_sqls, db_name, conn, decimal_places)
+    sol_sqls  = remove_round(sol_sqls)
+
+    result = ex_base(pred_sqls, sol_sqls, db_name, conn, conditions)
     assert result == 1, f"ex_base returned {result} but expected 1."
     return result
 
+
+# NOTE: function name should be `test_case`, not `test_case_default`
 TEST_CASE_DEFAULT="""
-def test_case(pred_sqls, sol_sqls, db_name, conn, decimal_places=None):
+def test_case(pred_sqls, sol_sqls, db_name, conn, conditions):
     # clean queries
     pred_sqls = remove_comments(pred_sqls)
-    sol_sqls = remove_comments(sol_sqls)
+    sol_sqls  = remove_comments(sol_sqls)
     pred_sqls = remove_distinct(pred_sqls)
-    sol_sqls = remove_distinct(sol_sqls)
-    
-    result = ex_base(pred_sqls, sol_sqls, db_name, conn, decimal_places)
+    pred_sqls = remove_round(pred_sqls)
+    sol_sqls  = remove_distinct(sol_sqls)
+    sol_sqls  = remove_round(sol_sqls)
+    result = ex_base(pred_sqls, sol_sqls, db_name, conn, conditions)
     assert result == 1, f"ex_base returned {result} but expected 1."
     return result
 """
+

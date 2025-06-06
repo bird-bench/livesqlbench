@@ -29,15 +29,20 @@ from db_utils import (
 )
 from test_utils import (
     check_sql_function_usage,
+    remove_round,
     remove_distinct,
     remove_comments,
     preprocess_results,
     ex_base,
     performance_compare_by_qep,
     TEST_CASE_DEFAULT,
+    test_case_default
 )
 
 MULTI_THREAD = True
+DEBUG_TEST_CASE_DEFAULT = False
+DEBUG_SOL_SQLS = False
+TEST_CERTAIN_SAPMLE = False
 # Global counters
 number_of_execution_errors = 0
 number_of_timeouts = 0
@@ -48,7 +53,7 @@ question_test_case_results = []
 
 
 def run_test_case(
-    test_code, result, logger, idx, return_dict, conn, pred_sqls, sol_sqls, db_name
+    test_code, result, logger, idx, return_dict, conn, pred_sqls, sol_sqls, db_name, kwargs
 ):
     """
     In a separate Process, runs the test_code with the given environment and captures pass/fail status.
@@ -61,6 +66,7 @@ def run_test_case(
         "check_sql_function_usage": check_sql_function_usage,
         "remove_distinct": remove_distinct,
         "remove_comments": remove_comments,
+        "remove_round": remove_round,
         "preprocess_results": preprocess_results,
         "pred_query_result": result,
     }
@@ -69,13 +75,14 @@ def run_test_case(
         "pred_sqls": pred_sqls,
         "sol_sqls": sol_sqls,
         "db_name": db_name,
+        "kwargs": kwargs,
     }
 
     logger.info(f"Passing result is {result}")
 
     test_case_code = "from datetime import date\n" + test_code
     test_case_code += (
-        "\n__test_case_result__ = test_case(pred_sqls, sol_sqls, db_name, conn)"
+        "\n__test_case_result__ = test_case(pred_sqls, sol_sqls, db_name, conn, **kwargs)"
     )
 
     logger.info(f"Test case content:\n{test_case_code}")
@@ -86,7 +93,11 @@ def run_test_case(
     sys.stdout = mystdout
 
     try:
-        exec(test_case_code, global_env, local_env)
+        if DEBUG_TEST_CASE_DEFAULT:
+            from datetime import date
+            __test_case_result__ = test_case_default(pred_sqls, sol_sqls, db_name, conn, **kwargs)
+        else:
+            exec(test_case_code, global_env, local_env)
         logger.info(f"Test case {idx} passed.")
         return_dict[idx] = "passed"
     except AssertionError as e:
@@ -104,7 +115,7 @@ def run_test_case(
 
 
 def execute_test_cases(
-    test_cases, sql_result, logger, conn, pred_sqls, sol_sql, db_name
+    test_cases, sql_result, logger, conn, pred_sqls, sol_sqls, db_name, kwargs
 ):
     """
     Spawns each test case in a separate Process.
@@ -127,8 +138,9 @@ def execute_test_cases(
                     return_dict,
                     conn,
                     pred_sqls,
-                    sol_sql,
+                    sol_sqls,
                     db_name,
+                    kwargs,
                 ),
             )
             p.start()
@@ -148,8 +160,9 @@ def execute_test_cases(
                 return_dict,
                 conn,
                 pred_sqls,
-                sol_sql,
+                sol_sqls,
                 db_name,
+                kwargs,
             )
 
     passed_count = 0
@@ -175,7 +188,7 @@ def run_preprocessing(preprocess_sql, db_name, logger, conn):
 
 
 def run_evaluation_phase(
-    pred_sqls, sol_sqls, db_name, test_cases, logger, conn, efficiency
+    pred_sqls, sol_sqls, db_name, test_cases, logger, conn, efficiency, kwargs
 ):
     """
     1. Execute 'pred_sql'
@@ -201,6 +214,7 @@ def run_evaluation_phase(
             pred_sqls,  # pred_sqls param for run_test_case
             sol_sqls,  # sol_sqls param for run_test_case
             db_name,
+            kwargs,
         )
 
         if failed_tests:
@@ -261,12 +275,20 @@ def process_one_instance(data_item, ephemeral_db_queues, args, global_stats_lock
     efficiency = data_item.get("efficiency", False)
     db_name = data_item["selected_database"]
     preprocess_sql = split_field(data_item, "preprocess_sql")
-    pred_sqls = split_field(data_item, "pred_sqls")
+    if DEBUG_SOL_SQLS:
+        pred_sqls = split_field(data_item, "sol_sql")
+    else:
+        pred_sqls = split_field(data_item, "pred_sqls")
     sol_sqls = split_field(data_item, "sol_sql")
     clean_up_sql = split_field(data_item, "clean_up_sql")
     test_cases = data_item.get("test_cases", [])
+    conditions = data_item.get("conditions", {})
+    kwargs = {}
     if not test_cases:
         test_cases = [TEST_CASE_DEFAULT]
+        kwargs = {"conditions": conditions} 
+        # The default test case requires the usage of `conditions`, e.g. `order` field to decide whether order of execution results will be evaluted, and if true, that means the execution results' order matters. Otherwise, the execution results' order does not matter. 
+        # But for the customized test cases, we dont need this `conditions` field, since test cases are designed case by case.
 
     evaluation_phase_execution_error = False
     evaluation_phase_timeout_error = False
@@ -320,6 +342,7 @@ def process_one_instance(data_item, ephemeral_db_queues, args, global_stats_lock
             logger,
             evaluation_conn,
             efficiency,
+            kwargs,
         )
 
         close_postgresql_connection(ephemeral_db, evaluation_conn)
@@ -491,6 +514,12 @@ def main():
                 pbar.update(1)
     else:
         for data_item in data_list:
+            instance_id = data_item["instance_id"]
+            if TEST_CERTAIN_SAPMLE:
+                if instance_id == "cybermarket_7":
+                    import pdb; pdb.set_trace()
+                else:
+                    continue
             res = process_one_instance(
                 data_item, ephemeral_db_queues, args, global_stats_lock
             )
