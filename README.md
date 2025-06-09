@@ -163,6 +163,20 @@ If you want the log file for each instance, you can set the `--logging` to `true
 - **🔄 LiveSQLBench-Large-Lite:** Industrial-scale databases with 1340+ columns
 - **🔄 LiveSQLBench-Large-Full:** Comprehensive large-scale datasets
 
+
+### 📊 Feature Comparison
+
+| Feature | LiveSQLBench-Base-Lite | LiveSQLBench-Base-Full | LiveSQLBench-Large-Full |
+|---------|------------------------|------------------------|-------------------------|
+| **User Tasks** | • 270 tasks<br>• Clear, direct queries with explicit DB/HKB connections<br>• Example1* | • 800 tasks <br>• Natural, colloquial queries with implicit DB/HKB connections<br>• Example2* | • 800 tasks<br>• Natural, colloquial queries with implicit DB/HKB connections<br>• Example2*, but with large DBs (industrial-scale DB)|
+| **Database** | • 18 base databases<br>• ~127 columns per DB<br>• Simple 1:1 relationships<br>• Clean data (no nulls, consistent formats) | • 25 base databases<br>• ~127 columns per DB<br>• Complex relationships (1:1, 1:N, N:1, N:N)<br>• Real-world data quality (e.g., nulls, duplicates, inconsistent formats) | • 25 large databases<br>• ~1,340 columns per DB<br>• Complex relationships (1:1, 1:N, N:1, N:N)<br>• Real-world data quality (e.g., nulls, duplicates, inconsistent formats) |
+| **Hierarchical Knowledge Base (HKB)** | • Structured HKB-JSON format only | • Dual format support:<br>1. Structured HKB-JSON<br>2. Unstructured HKB-Document | • Dual format support:<br>1. Structured HKB-JSON<br>2. Unstructured HKB-Document |
+
+\* Example1 (more formal): *"For our archaeological site evaluation, I need to quantify the Digital Preservation Quality metrics across our collection. Please compute a comprehensive DPQ index for each archaeological location. Present the results in descending order of DPQ values, displaying only the site identification code, site designation, and calculated DPQ value (rounded to two decimal places) to facilitate prioritization of our digital preservation resources."*
+
+\* Example2 (more colloquial): *"I need to assess digital preservation quality across our archaeological sites. Can you calculate a DPQ score for each location and show me the results ranked by quality? Just include the site code, designation, and DPQ value rounded to two decimals - I want to see which sites need attention first for our preservation planning."*
+
+
 Want new dialects? Vote for new SQL dialects [🗳️ here](https://docs.google.com/forms/d/e/1FAIpQLSfEogmsA7LObI13KOoiojdnYfW28KEqvEVtC9hXaZJ8O9aCpQ/viewform?usp=header)!
 
 ## Created By:
