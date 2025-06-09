@@ -154,8 +154,7 @@ If you want the log file for each instance, you can set the `--logging` to `true
 |------|-------|------------------|----------------------|
 | 🥇 1 | o3-mini | 47.78 | 0.0233 |
 | 🥈 2 | GPT-4.1 | 44.10 | 0.0336 |
-| 🥉 3 | o3 | 42.59 | 0.2129 |
-| 🥉 4 | Claude Sonnet 4 | 42.59 | 0.0623 |
+| 🥉 3 | Claude Sonnet 4 | 42.59 | 0.0623 |
 > More results can be found [here](https://livesqlbench.ai)
 
 ## 🔄 Upcoming Releases
