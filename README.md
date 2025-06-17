@@ -174,7 +174,7 @@ If you want the log file for each instance, you can set the `--logging` to `true
 
 \* Example1 (more formal): *"For our archaeological site evaluation, I need to quantify the Digital Preservation Quality metrics across our collection. Please compute a comprehensive DPQ index for each archaeological location. Present the results in descending order of DPQ values, displaying only the site identification code, site designation, and calculated DPQ value (rounded to two decimal places) to facilitate prioritization of our digital preservation resources."*
 
-\* Example2 (more colloquial): *"I need to assess digital preservation quality across our archaeological sites. Can you calculate a DPQ score for each location and show me the results ranked by quality? Just include the site code, designation, and DPQ value rounded to two decimals - I want to see which sites need attention first for our preservation planning."*
+\* Example2 (more colloquial): *"To better allocate our digital preservation resources, I need to identify which archaeological sites have the most robust digital records. Can you generate a ranked list showing each site's primary identifier, its designation, and a metric quantifying its digital preservation quality? Please sort the list to show the highest-quality sites first, with the quality metric rounded to the second decimal."*
 
 
 Want new dialects? Vote for new SQL dialects [🗳️ here](https://docs.google.com/forms/d/e/1FAIpQLSfEogmsA7LObI13KOoiojdnYfW28KEqvEVtC9hXaZJ8O9aCpQ/viewform?usp=header)!
