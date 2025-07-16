@@ -12,6 +12,7 @@ from logger import (
 
 
 HOST = "livesqlbench_postgresql"
+PORT = 5432
 
 _postgresql_pools = {}
 
@@ -21,7 +22,7 @@ DEFAULT_DB_CONFIG = {
     "user": "root",
     "password": "123123",
     "host": HOST,
-    "port": 5432,
+    "port": PORT,
 }
 
 def _get_or_init_pool(db_name):
@@ -68,18 +69,26 @@ def perform_query_on_postgresql_databases(query, db_name, conn=None):
         lower_q = query.strip().lower()
         conn.commit()
 
-        if lower_q.startswith("select") or lower_q.startswith("with"):
-            # Fetch up to MAX_ROWS + 1 to see if there's an overflow
+        # if lower_q.startswith("select") or lower_q.startswith("with"):
+        #     # Fetch up to MAX_ROWS + 1 to see if there's an overflow
+        #     rows = cursor.fetchmany(MAX_ROWS + 1)
+        #     if len(rows) > MAX_ROWS:
+        #         rows = rows[:MAX_ROWS]
+        #     result = rows
+        # else:
+        #     try:
+        #         result = cursor.fetchall()
+        #     except psycopg2.ProgrammingError:
+        #         result = None
+
+        # return (result, conn)
+        try:
             rows = cursor.fetchmany(MAX_ROWS + 1)
             if len(rows) > MAX_ROWS:
                 rows = rows[:MAX_ROWS]
             result = rows
-        else:
-            try:
-                result = cursor.fetchall()
-            except psycopg2.ProgrammingError:
-                result = None
-
+        except psycopg2.ProgrammingError:
+            result = None
         return (result, conn)
 
     except Exception as e:
@@ -135,7 +144,7 @@ def reset_and_restore_database(db_name, pg_password, logger):
     4) createdb --template ...
     """
     pg_host = HOST
-    pg_port = 5432
+    pg_port = PORT
     pg_user = "root"
 
     env_vars = os.environ.copy()
@@ -205,7 +214,7 @@ def create_ephemeral_db_copies(base_db_names, num_copies, pg_password, logger):
     from base_db_template. Return a dict: {base_db: [ephemeral1, ephemeral2, ...], ...}
     """
     pg_host = HOST
-    pg_port = 5432
+    pg_port = PORT
     pg_user = "root"
     env_vars = os.environ.copy()
     env_vars["PGPASSWORD"] = pg_password
@@ -253,7 +262,7 @@ def drop_ephemeral_dbs(ephemeral_db_pool_dict, pg_password, logger):
     Delete all ephemeral databases created during the script execution.
     """
     pg_host = HOST
-    pg_port = 5432
+    pg_port = PORT
     pg_user = "root"
     env_vars = os.environ.copy()
     env_vars["PGPASSWORD"] = pg_password
