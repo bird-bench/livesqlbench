@@ -28,6 +28,13 @@
 
 ## News
 
+
+- 🔥🔥🔥 **[2025-09-04]** We are pleased to release <a href="https://huggingface.co/datasets/birdsql/livesqlbench-base-full-v1" target="_blank" rel="noopener noreferrer"><b>LiveSQLBench-Base-Full v1</b></a>, a new release with <b>600 NEW tasks</b> over <b>22 NEW real, complex databases</b> with KB docs.<b>NEW FEATURES</b>: more natural, reasoning-intensive user tasks and richer, noisier DB schemas/values. See the <a href="https://huggingface.co/datasets/birdsql/livesqlbench-base-full-v1" target="_blank" rel="noopener noreferrer">dataset</a> and [leaderboard](https://livesqlbench.ai) for details
+
+
+- 🚀 **[2025-08-26]** We're excited to announce the release of the **[BIRD-Interact-Full](https://huggingface.co/datasets/birdsql/bird-interact-full)** set, which is built on top of LiveSQLBench-Base-Full-v1. It focuses on evaluating the interactive ability of LLMs with both **Database** and **User** environments to finish the text-to-SQL tasks. Please visit our [project website](https://bird-interact.github.io) for more details.
+
+
 - 📢 **[2025-07-28]** We are pleased to release [**LiveSQLBench-Base-Lite-SQLite**](https://huggingface.co/datasets/birdsql/livesqlbench-base-lite-sqlite), extending from PostgreSQL to SQLite dialect to improve accessibility. Please check another repo [BIRD-Mini-Dev v2](https://github.com/bird-bench/mini_dev/tree/main/live_sql_bench_sqlite) and [dataset](https://huggingface.co/datasets/birdsql/livesqlbench-base-lite-sqlite) for more details.
 
 - 📢 **[2025-05-30]** We are pleased to release [**LiveSQLBench-Base-Lite**](https://huggingface.co/datasets/birdsql/livesqlbench-base-lite), featuring 18 end-user level databases and 270 tasks (180 SELECT-only, 90 Management tasks). Each task involves unambiguous and straightforward user queries grounded in external knowledge, with medium to hard complexity SQL statements.
@@ -57,24 +64,27 @@ Support fast evaluation via PostgreSQL template & docker. Each question includes
 6. **🔄 Truly Live & Hidden Test:**
 New databases and tasks are added over time. Each release features both open development and hidden test phases. The hidden test set from each release becomes the open development set for the next release, ensuring continuous evolution and fair evaluation.
 
-### 🎯 Current Release: LiveSQLBench-Base-Lite
+### 🎯 Current Release: LiveSQLBench-Base-Lite and LiveSQLBench-Base-Full
 
-Currently, we are pleased to release **LiveSQLBench-Base-Lite**, featuring:
-- **18 end-user level databases**
-- **270 tasks** (180 SELECT-only, 90 Management tasks)
-- **HKB-JSON** and **JSON operation in SQL** for trial
--  Each task involves unambiguous and straightforward user queries grounded in external knowledge, with medium to hard complexity SQL statements.
+We have released **LiveSQLBench-Base-Lite** and **LiveSQLBench-Base-Full**, featuring:
+- **New end-user level databases** with complex relationships and noisy schema and data.
+- **New tasks** 
+  - Covering both SELECT-only and Management tasks,
+  - Lite version has straightforward queries, while Full version has more natural, reasoning-intensive queries.
+  - Both versions are **without ambiguity**.
+  - Grounded in external knowledge, with medium to hard complexity SQL statements.
+- **HKB** for multi-hop retrieval and reasoning
 
 
 ## 📦 Dataset Details
 
 ### Dataset Description
 
-- **Database:** The database can be downloaded from [the HuggingFace](https://huggingface.co/datasets/birdsql/livesqlbench-base-lite)
+- **Database:** The database can be downloaded from [livesqlbench-base-lite](https://huggingface.co/datasets/birdsql/livesqlbench-base-lite) and [livesqlbench-base-full](https://huggingface.co/datasets/birdsql/livesqlbench-base-full)
 - **Data Fields:**
    - `instance_id`: Unique task identifier
    - `selected_database`: Associated database name
-   - `query`: Ambiguous user query
+   - `query`: User query
    - `sol_sql`: Ground truth SQL solution
    - `external_knowledge`: IDs of required external knowledge
    - `preprocess_sql`: SQL setup queries
@@ -87,12 +97,12 @@ Currently, we are pleased to release **LiveSQLBench-Base-Lite**, featuring:
 
 **Data viewer**: Explore our data through data viewer in our website [livesqlbench.ai](https://livesqlbench.ai).
 
-🔐 To avoid data leakage by auto-crawling, certain fields (e.g., `sol_sql`, `test_cases`, `external_knowledge`) are excluded from the public dataset `livesqlbench_data.jsonl`. For the full dataset, please email: **[📧 bird.bench25@gmail.com](mailto:bird.bench25@gmail.com)** with subject tag `[livesqlbench-base-lite GT&Test Cases]`, which will be sent automatically.
+🔐 To avoid data leakage by auto-crawling, certain fields (e.g., `sol_sql`, `test_cases`, `external_knowledge`) are excluded from the public dataset `livesqlbench_data.jsonl`. For the full dataset, please email: **[📧 bird.bench25@gmail.com](mailto:bird.bench25@gmail.com)** with subject tag `[livesqlbench-base-lite GT&Test Cases]` for Lite version or `[livesqlbench-base-full-v1 GT&Test Cases]` for Full version, which will be sent automatically.
 
 
 
 
-## 💨 Quick Eval
+## 💨 Quick Eval (LiveSQLBench-Base-Lite)
 
 ### Prepare the Dataset
 
@@ -138,6 +148,7 @@ We use **docker** to provide a consistent environment for running the benchmark.
 cd evaluation
 docker compose up --build
 ```
+
 4. Interact with the PostgreSQL database (Optional)
 Use the `perform_query_on_postgresql_databases()` function in the `evaluation/src/db_utils.py` file to interact with the PostgreSQL database. `query` is the SQL query you want to run, and `db_name` is the name of the database you want to run the query on. The function will return the result of the query.
 5. Run the evaluation script inside the `so_eval_env` container
@@ -149,30 +160,44 @@ bash run_eval.sh
 The output will be save in the [`./evaluation/outputs/final_output/`](./evaluation/outputs/final_output/)
 If you want the log file for each instance, you can set the `--logging` to `true` in the `run_eval.sh` script.
 
+## 💨 Quick Eval (LiveSQLBench-Base-Full)
 
-## 📊 Model Performance on LiveSQLBench-Base-Lite (2025-05-28)
+Similar to the above, but do the following changes:
+
+0. (Optional) If you have already built the docker of Lite version, you can remove it or build a new one for Full version.
+1. Change the database dumps (postgre_table_dumps)  and [building script](./evaluation/env/init-databases_postgresql.sh) to the full version from [the Google Drive](https://drive.google.com/file/d/1V9SFIWebi27JtaDUAScG1xE9ELbYcWLR/view?usp=sharing).
+2. Change the databaes metafiles and livesqlbench_data.jsonl to the full version from [huggingface](https://huggingface.co/datasets/birdsql/livesqlbench-base-full-v1).
+3. Using the new generated prompt for Full version to get LLM outputs.
+4. Using the new evaluation env to evaluate the LLM outputs.
+
+
+## 📊 Model Performance on LiveSQLBench
+
+LiveSQLBench-Base-Lite (2025-05-28)
 
 | Rank | Model | Success Rate (%) | Avg. Cost (USD) / Task |
 |------|-------|------------------|----------------------|
 | 🥇 1 | o3-mini | 47.78 | 0.0233 |
 | 🥈 2 | GPT-4.1 | 44.10 | 0.0336 |
 | 🥉 3 | Claude Sonnet 4 | 42.59 | 0.0623 |
-> More results can be found [here](https://livesqlbench.ai)
+
+More results can be found [here](https://livesqlbench.ai)
 
 ## 🔄 Upcoming Releases
 
-- **🔄 LiveSQLBench-Base-Full:** 600 BI tasks, 200 management tasks, Document-based HKB
-- **🔄 LiveSQLBench-Large-Lite:** Industrial-scale databases with 1340+ columns
-- **🔄 LiveSQLBench-Large-Full:** Comprehensive large-scale datasets
+- [x] **🔄 LiveSQLBench-Base-Lite:** 18 NEW databases and 270 NEW tasks with straightforward, direct queries. 
+- [x] **🔄 LiveSQLBench-Base-Full:** 22 NEW databases and 600 NEW tasks with more natural, reasoning-intensive user tasks and richer, noisier DB schemas/values.
+- [ ] **🔄 LiveSQLBench-Large-Lite:** Industrial-scale databases with 1340+ columns
+- [ ] **🔄 LiveSQLBench-Large-Full:** Comprehensive large-scale datasets
 
 
 ### 📊 Feature Comparison
 
 | Feature | LiveSQLBench-Base-Lite | LiveSQLBench-Base-Full | LiveSQLBench-Large-Full |
 |---------|------------------------|------------------------|-------------------------|
-| **User Tasks** | • 270 tasks<br>• Clear, direct queries with explicit DB/HKB connections<br>• Example1* | • 800 tasks <br>• Natural, colloquial queries with implicit DB/HKB connections<br>• Example2* | • 800 tasks<br>• Natural, colloquial queries with implicit DB/HKB connections<br>• Example2*, but with large DBs (industrial-scale DB)|
-| **Database** | • 18 base databases<br>• ~127 columns per DB<br>• Simple 1:1 relationships<br>• Clean data (no nulls, consistent formats) | • 25 base databases<br>• ~127 columns per DB<br>• Complex relationships (1:1, 1:N, N:1, N:N)<br>• Real-world data quality (e.g., nulls, duplicates, inconsistent formats) | • 25 large databases<br>• ~1,340 columns per DB<br>• Complex relationships (1:1, 1:N, N:1, N:N)<br>• Real-world data quality (e.g., nulls, duplicates, inconsistent formats) |
-| **Hierarchical Knowledge Base (HKB)** | • Structured HKB-JSON format only | • Dual format support:<br>1. Structured HKB-JSON<br>2. Unstructured HKB-Document | • Dual format support:<br>1. Structured HKB-JSON<br>2. Unstructured HKB-Document |
+| **User Tasks** | • 270 tasks<br>• Clear, direct queries with explicit DB/HKB connections<br>• Example1* | • 600 tasks <br>• Natural, colloquial queries with implicit DB/HKB connections<br>• Example2* | • 600 tasks<br>• Natural, colloquial queries with implicit DB/HKB connections<br>• Example2*, but with large DBs (industrial-scale DB)|
+| **Database** | • 18 base databases<br>• ~127 columns per DB<br>• Simple 1:1 relationships<br>• Clean data (no nulls, consistent formats) | • 22 base databases<br>• ~127 columns per DB<br>• Complex relationships (1:1, 1:N, N:1, N:N)<br>• Real-world data quality (e.g., nulls, duplicates, inconsistent formats) | • 22 large databases<br>• ~1,340 columns per DB<br>• Complex relationships (1:1, 1:N, N:1, N:N)<br>• Real-world data quality (e.g., nulls, duplicates, inconsistent formats) |
+| **Hierarchical Knowledge Base (HKB)** | • Structured HKB-JSON format only | • Dual format support:<br>1. Structured HKB-JSON<br>2. Unstructured HKB-Document (coming soon) | • Dual format support:<br>1. Structured HKB-JSON<br>2. Unstructured HKB-Document (coming soon) |
 
 \* Example1 (more formal): *"For our archaeological site evaluation, I need to quantify the Digital Preservation Quality metrics across our collection. Please compute a comprehensive DPQ index for each archaeological location. Present the results in descending order of DPQ values, displaying only the site identification code, site designation, and calculated DPQ value (rounded to two decimal places) to facilitate prioritization of our digital preservation resources."*
 
@@ -193,6 +218,11 @@ BIRD Team & Google Cloud
 <summary>Changelog</summary>
 
 All notable changes to this project will be documented in this file.
+
+### 2025-09-04
+- Released LiveSQLBench-Base-Full v1 with 600 NEW tasks over 22 NEW real, complex databases with KB docs.
+- New features: more natural, reasoning-intensive user tasks and richer, noisier DB schemas/values.
+- The leaderboard is updated with some LLM results (e.g., GPT-5, gemini-2.5-pro).
 
 ### 2025-06-06
 - SQL evaluation postprocessing improvements:
