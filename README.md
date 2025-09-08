@@ -209,6 +209,18 @@ Want new dialects? Vote for new SQL dialects [🗳️ here](https://docs.google.
 ## Created By:
 BIRD Team & Google Cloud
 
+## Citation
+If you find this work useful, please cite:
+```bibtex
+@misc{livesqlbench2025,
+  author       = {BIRD Team},
+  title        = {LiveSQLBench: A Dynamic and Contamination-Free Benchmark for Evaluating LLMs on Real-World Text-to-SQL Tasks},
+  year         = {2024},
+  howpublished = {https://github.com/bird-bench/livesqlbench},
+  note         = {Accessed: 2025-05-22}
+}
+```
+
 
 ## Changelog
 
