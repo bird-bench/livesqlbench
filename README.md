@@ -141,7 +141,7 @@ The output will be save in the [`./evaluation/outputs/final_output/`](./evaluati
 ### Evaluation
 We use **docker** to provide a consistent environment for running the benchmark. To set up the environment, follow these steps:
 
-1. First download the PostgreSQL database from [the Google Drive](https://drive.google.com/file/d/1KABce6czIqL9kMyIX7i-_A0CIQoDnmyW/view?usp=sharing).
+1. First download the PostgreSQL database from [the Google Drive](https://drive.google.com/file/d/1QIGQlRKbkqApAOrQXPqFJgUg8rQ7HRRZ/view?usp=sharing).
 2. Unzip the folder and save it in the [`./evaluation`](./evaluation) named with `postgre_table_dumps`
 3. Build the docker compose
 ```bash
