@@ -32,9 +32,6 @@
 - 🔥🔥🔥 **[2025-09-04]** We are pleased to release <a href="https://huggingface.co/datasets/birdsql/livesqlbench-base-full-v1" target="_blank" rel="noopener noreferrer"><b>LiveSQLBench-Base-Full v1</b></a>, a new release with <b>600 NEW tasks</b> over <b>22 NEW real, complex databases</b> with KB docs.<b>NEW FEATURES</b>: more natural, reasoning-intensive user tasks and richer, noisier DB schemas/values. See the <a href="https://huggingface.co/datasets/birdsql/livesqlbench-base-full-v1" target="_blank" rel="noopener noreferrer">dataset</a> and [leaderboard](https://livesqlbench.ai) for details
 
 
-- 🚀 **[2025-08-26]** We're excited to announce the release of the **[BIRD-Interact-Full](https://huggingface.co/datasets/birdsql/bird-interact-full)** set, which is built on top of LiveSQLBench-Base-Full-v1. It focuses on evaluating the interactive ability of LLMs with both **Database** and **User** environments to finish the text-to-SQL tasks. Please visit our [project website](https://bird-interact.github.io) for more details.
-
-
 - 📢 **[2025-07-28]** We are pleased to release [**LiveSQLBench-Base-Lite-SQLite**](https://huggingface.co/datasets/birdsql/livesqlbench-base-lite-sqlite), extending from PostgreSQL to SQLite dialect to improve accessibility. Please check another repo [BIRD-Mini-Dev v2](https://github.com/bird-bench/mini_dev/tree/main/live_sql_bench_sqlite) and [dataset](https://huggingface.co/datasets/birdsql/livesqlbench-base-lite-sqlite) for more details.
 
 - 📢 **[2025-05-30]** We are pleased to release [**LiveSQLBench-Base-Lite**](https://huggingface.co/datasets/birdsql/livesqlbench-base-lite), featuring 18 end-user level databases and 270 tasks (180 SELECT-only, 90 Management tasks). Each task involves unambiguous and straightforward user queries grounded in external knowledge, with medium to hard complexity SQL statements.
