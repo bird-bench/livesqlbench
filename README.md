@@ -28,6 +28,7 @@
 
 ## News
 
+- 🚀 **[2025-10-21]** We pre-build the docker images for the LiveSQLBench-Base-Lite and LiveSQLBench-Base-Full, and evaluation environment to facilitate the environment setup. Please check the [docker-compose.yml](./docker-compose.yml) file for more details.
 
 - 🔥🔥🔥 **[2025-09-04]** We are pleased to release <a href="https://huggingface.co/datasets/birdsql/livesqlbench-base-full-v1" target="_blank" rel="noopener noreferrer"><b>LiveSQLBench-Base-Full v1</b></a>, a new release with <b>600 NEW tasks</b> over <b>22 NEW real, complex databases</b> with KB docs.<b>NEW FEATURES</b>: more natural, reasoning-intensive user tasks and richer, noisier DB schemas/values. See the <a href="https://huggingface.co/datasets/birdsql/livesqlbench-base-full-v1" target="_blank" rel="noopener noreferrer">dataset</a> and [leaderboard](https://livesqlbench.ai) for details
 
@@ -138,17 +139,24 @@ The output will be save in the [`./evaluation/outputs/final_output/`](./evaluati
 ### Evaluation
 We use **docker** to provide a consistent environment for running the benchmark. To set up the environment, follow these steps:
 
-1. First download the PostgreSQL database from [the Google Drive](https://drive.google.com/file/d/1QIGQlRKbkqApAOrQXPqFJgUg8rQ7HRRZ/view?usp=sharing).
-2. Unzip the folder and save it in the [`./evaluation`](./evaluation) named with `postgre_table_dumps`
-3. Build the docker compose
+1. Build the docker compose
 ```bash
 cd evaluation
-docker compose up --build
+docker compose pull
+docker compose up 
 ```
 
-4. Interact with the PostgreSQL database (Optional)
+This contains three containers:
+- `postgresql`: the PostgreSQL database for the base-lite DB Environment
+- `postgresql_base_full`: the PostgreSQL database for the base-full DB Environment
+- `so_eval_env`: the environment for the evaluation
+
+Just comment out the `postgresql_base_full` container in the `docker-compose.yml` file if you only want to evaluate the base-lite version.
+
+
+2. Interact with the PostgreSQL database (Optional)
 Use the `perform_query_on_postgresql_databases()` function in the `evaluation/src/db_utils.py` file to interact with the PostgreSQL database. `query` is the SQL query you want to run, and `db_name` is the name of the database you want to run the query on. The function will return the result of the query.
-5. Run the evaluation script inside the `so_eval_env` container
+3. Run the evaluation script inside the `so_eval_env` container
 ```bash
 docker compose exec so_eval_env bash
 cd run
@@ -161,11 +169,10 @@ If you want the log file for each instance, you can set the `--logging` to `true
 
 Similar to the above, but do the following changes:
 
-0. (Optional) If you have already built the docker of Lite version, you can remove it or build a new one for Full version.
-1. Change the database dumps (postgre_table_dumps)  and [building script](./evaluation/env/init-databases_postgresql.sh) to the full version from [the Google Drive](https://drive.google.com/file/d/1V9SFIWebi27JtaDUAScG1xE9ELbYcWLR/view?usp=sharing).
+1. Change the DB host name in the `evaluation/src/db_utils.py` file from `livesqlbench_postgresql` to `livesqlbench_postgresql_base_full`.
 2. Change the databaes metafiles and livesqlbench_data.jsonl to the full version from [huggingface](https://huggingface.co/datasets/birdsql/livesqlbench-base-full-v1).
 3. Using the new generated prompt for Full version to get LLM outputs.
-4. Using the new evaluation env to evaluate the LLM outputs.
+4. Using the new evaluation env with modified DB host to evaluate the LLM outputs.
 
 
 ## 📊 Model Performance on LiveSQLBench
