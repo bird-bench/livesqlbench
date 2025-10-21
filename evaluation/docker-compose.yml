@@ -2,9 +2,7 @@ version: "3.8"
 
 services:
   postgresql:
-    build:
-      context: .
-      dockerfile: ./env/Dockerfile.postgresql
+    image: shawnxxh/livesqlbench-postgresql:latest
     container_name: livesqlbench_postgresql
     environment:
       POSTGRES_USER: root
@@ -12,21 +10,31 @@ services:
       TZ: "Asia/Hong_Kong"
     volumes:
       - postgresql_data:/var/lib/postgresql/data
-      - ./postgre_table_dumps:/docker-entrypoint-initdb.d/postgre_table_dumps
     ports:
       - "5432:5432"
 
+  postgresql_base_full:
+    image: shawnxxh/livesqlbench-postgresql-base-full:latest
+    container_name: livesqlbench_postgresql_base_full
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: 123123
+      TZ: "Asia/Hong_Kong"
+    volumes:
+      - postgresql_base_full_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
   so_eval_env:
-    build:
-      context: .
-      dockerfile: ./env/Dockerfile.so_eval
+    image: shawnxxh/livesqlbench-so-eval:latest
     container_name: livesqlbench_so_eval_env
     volumes:
       - ./:/app/
-      - ./postgre_table_dumps:/app/postgre_table_dumps
     depends_on:
       - postgresql
+      - postgresql_base_full
     command: ["tail", "-f", "/dev/null"]
 
 volumes:
   postgresql_data:
+  postgresql_base_full_data:
