@@ -2,7 +2,9 @@ version: "3.8"
 
 services:
   postgresql:
-    image: docker.io/shawnxxh/bird-interact-postgresql:latest
+    build:
+      context: .
+      dockerfile: env/Dockerfile.postgresql
     container_name: livesqlbench_postgresql
     environment:
       POSTGRES_USER: root
@@ -14,7 +16,9 @@ services:
       - "5432:5432"
 
   postgresql_base_full:
-    image: docker.io/shawnxxh/bird-interact-postgresql-full:latest
+    build:
+      context: .
+      dockerfile: env/Dockerfile.postgresql_base_full
     container_name: livesqlbench_postgresql_base_full
     environment:
       POSTGRES_USER: root
@@ -26,7 +30,9 @@ services:
       - "5433:5432"
 
   so_eval_env:
-    image: docker.io/shawnxxh/livesqlbench-so-eval:latest
+    build:
+      context: .
+      dockerfile: env/Dockerfile.so_eval
     container_name: livesqlbench_so_eval_env
     volumes:
       - ./:/app/

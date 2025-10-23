@@ -28,7 +28,7 @@
 
 ## News
 
-- 🚀 **[2025-10-21]** We pre-build the docker images for the LiveSQLBench-Base-Lite and LiveSQLBench-Base-Full, and evaluation environment to facilitate the environment setup. Please check the [docker-compose.yml](./docker-compose.yml) file for more details.
+- 🚀 **[2025-10-23]**  **Docker update**: We added the docker for Full DB Env. And we pushed 3 docker images (Base-Lite/Full DB Env and the evaluation environment) to Docker Hub to facilitate the environment setup. No need to download the DB dumps and build the images manually!
 
 - 🔥🔥🔥 **[2025-09-04]** We are pleased to release <a href="https://huggingface.co/datasets/birdsql/livesqlbench-base-full-v1" target="_blank" rel="noopener noreferrer"><b>LiveSQLBench-Base-Full v1</b></a>, a new release with <b>600 NEW tasks</b> over <b>22 NEW real, complex databases</b> with KB docs.<b>NEW FEATURES</b>: more natural, reasoning-intensive user tasks and richer, noisier DB schemas/values. See the <a href="https://huggingface.co/datasets/birdsql/livesqlbench-base-full-v1" target="_blank" rel="noopener noreferrer">dataset</a> and [leaderboard](https://livesqlbench.ai) for details
 
@@ -116,8 +116,8 @@ python integrate_gt_data.py --gt_file <path_to_gt_file>
 ```
 
 
-### Environment Setup
-To run the baseline code you need to install the following dependencies:
+### Generation Environment Setup
+To run the baseline code to generate LLM outputs, you need to install the following dependencies:
 ```bash
 conda create -n livesqlbench python=3.10 -y
 conda activate livesqlbench
@@ -136,27 +136,70 @@ bash run_baseline.sh
 ```
 The output will be save in the [`./evaluation/outputs/final_output/`](./evaluation/outputs/final_output/)
 
-### Evaluation
+
+
+### Evaluation Environment Setup
+
 We use **docker** to provide a consistent environment for running the benchmark. To set up the environment, follow these steps:
 
-1. Build the docker compose
-```bash
-cd evaluation
-docker compose pull
-docker compose up 
-```
+1. Build the docker compose using pre-built images
+    ```bash
+    cd evaluation
+    docker compose pull
+    docker compose up 
+    ```
+    This contains three containers:
+    - `livesqlbench_postgresql`: the PostgreSQL database for the base-lite DB Environment
+    - `livesqlbench_postgresql_base_full`: the PostgreSQL database for the base-full DB Environment
+    - `livesqlbench_so_eval_env`: the environment for the evaluation
 
-This contains three containers:
-- `postgresql`: the PostgreSQL database for the base-lite DB Environment
-- `postgresql_base_full`: the PostgreSQL database for the base-full DB Environment
-- `so_eval_env`: the environment for the evaluation
-
-Just comment out the `postgresql_base_full` container in the `docker-compose.yml` file if you only want to evaluate the base-lite version.
+    Just comment out the `postgresql_base_full` service in the `docker-compose.yml` file if you only want to evaluate the base-lite version.
 
 
-2. Interact with the PostgreSQL database (Optional)
-Use the `perform_query_on_postgresql_databases()` function in the `evaluation/src/db_utils.py` file to interact with the PostgreSQL database. `query` is the SQL query you want to run, and `db_name` is the name of the database you want to run the query on. The function will return the result of the query.
-3. Run the evaluation script inside the `so_eval_env` container
+2. (Optional) Build the docker images from scratch
+   - Downdload the database dumps 
+      - [livesqlbench-base-lite](https://drive.google.com/file/d/1QIGQlRKbkqApAOrQXPqFJgUg8rQ7HRRZ/view). Unzip and rename it as `evaluation/postgre_table_dumps`.
+      - [livesqlbench-base-full](https://drive.google.com/file/d/1V9SFIWebi27JtaDUAScG1xE9ELbYcWLR/view). Unzip and rename it as `evaluation/postgre_table_dumps_full`.
+   - Build the environment manually by running `docker-compose.build.yml`.
+      ```bash
+      cd evaluation
+      docker compose -f docker-compose.build.yml build
+      docker compose -f docker-compose.build.yml up -d
+      ```
+
+3. (Recommended) Check the database containers are built and running successfully.
+
+    -  Print the container build logs to ensure that the databases are built successfully without errors:
+      ```bash 
+      docker logs livesqlbench_postgresql > build_livesqlbench_postgresql.log 2>&1
+      docker logs livesqlbench_postgresql_base_full > build_livesqlbench_postgresql_base_full.log 2>&1
+      ```
+      If errors occur, `"Errors occurred during import:"` will be printed in the log files.
+
+    -  Test the database containers are running correctly:
+      Take `livesqlbench_postgresql` as example,
+      Start the `livesqlbench_so_eval_env` container and connect to the `livesqlbench_postgresql` database:
+      ```bash
+      docker compose exec so_eval_env bash
+      psql -h postgresql  # passwd: 123123
+      ```
+      Then list the databases.
+      ```sql
+      \l
+      ```
+      You should see the databases, and you could execute SQL commands on it:
+      ```
+                                                            List of databases
+                Name          | Owner | Encoding | Locale Provider |  Collate   |   Ctype    | Locale | ICU Rules | Access privileges 
+      ------------------------+-------+----------+-----------------+------------+------------+--------+-----------+-------------------
+      alien                  | root  | UTF8     | libc            | en_US.utf8 | en_US.utf8 |        |           | 
+      alien_template         | root  | UTF8     | libc            | en_US.utf8 | en_US.utf8 |        |           | 
+      ...
+      ```
+   
+
+### Evaluation Run
+Exec into the `livesqlbench_so_eval_env` container and start the evaluation:
 ```bash
 docker compose exec so_eval_env bash
 cd run
