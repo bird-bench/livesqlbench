@@ -169,33 +169,36 @@ We use **docker** to provide a consistent environment for running the benchmark.
 
 3. (Recommended) Check the database containers are built and running successfully.
 
-    -  Print the container build logs to ensure that the databases are built successfully without errors:
-      ```bash 
-      docker logs livesqlbench_postgresql > build_livesqlbench_postgresql.log 2>&1
-      docker logs livesqlbench_postgresql_base_full > build_livesqlbench_postgresql_base_full.log 2>&1
-      ```
-      If errors occur, `"Errors occurred during import:"` will be printed in the log files.
+-  Print the container build logs to ensure that the databases are built successfully without errors:
+   ```bash 
+   docker logs livesqlbench_postgresql > build_livesqlbench_postgresql.log 2>&1
+   docker logs livesqlbench_postgresql_base_full > build_livesqlbench_postgresql_base_full.log 2>&1
+   ```
+   If errors occur, `"Errors occurred during import:"` will be printed in the log files.
 
-    -  Test the database containers are running correctly:
-      Take `livesqlbench_postgresql` as example,
-      Start the `livesqlbench_so_eval_env` container and connect to the `livesqlbench_postgresql` database:
-      ```bash
-      docker compose exec so_eval_env bash
-      psql -h postgresql  # passwd: 123123
-      ```
-      Then list the databases.
-      ```sql
-      \l
-      ```
-      You should see the databases, and you could execute SQL commands on it:
-      ```
-                                                            List of databases
-                Name          | Owner | Encoding | Locale Provider |  Collate   |   Ctype    | Locale | ICU Rules | Access privileges 
-      ------------------------+-------+----------+-----------------+------------+------------+--------+-----------+-------------------
-      alien                  | root  | UTF8     | libc            | en_US.utf8 | en_US.utf8 |        |           | 
-      alien_template         | root  | UTF8     | libc            | en_US.utf8 | en_US.utf8 |        |           | 
-      ...
-      ```
+
+-  Check if the database containers are in good shape.
+   
+   Use our provided Python script to verify database metadata:
+   ```bash
+   docker compose exec so_eval_env bash
+   python check_db_metadata.py --host livesqlbench_postgresql
+   python check_db_metadata.py --host livesqlbench_postgresql_base_full
+   ```
+   
+   Expected results:
+   - **livesqlbench-base-lite**: 
+     - 📈 Total Databases: 18
+     - 📋 Total Tables: 175
+     - 🔢 Total Columns: 2286
+     - 📈 Avg Rows per Table: 1,038.48
+     - 💾 Total Size: 207.15 MB (around)
+   - **livesqlbench-base-full**: 
+     - 📈 Total Databases: 22
+     - 📋 Total Tables: 244
+     - 🔢 Total Columns: 2011
+     - 📈 Avg Rows per Table: 1,121.19
+     - 💾 Total Size: 272.00 MB (around)
    
 
 ### Evaluation Run
