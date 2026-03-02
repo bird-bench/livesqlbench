@@ -60,6 +60,28 @@ EXPECTED_DATABASES_FULL = {
     "virtual_idol": "fans virtualidols interactions membershipandspending engagement commerceandcollection socialcommunity eventsandclub loyaltyandachievements preferencesandsettings moderationandcompliance supportandfeedback retentionandinfluence additionalnotes"
 }
 
+# Large-v1 database names (table-level checks are optional and currently not enforced here)
+EXPECTED_DATABASES_LARGE = {
+    "archeology_scan_large": "",
+    "cross_border_large": "",
+    "cybermarket_pattern_large": "",
+    "disaster_relief_large": "",
+    "exchange_traded_funds_large": "",
+    "fake_account_large": "",
+    "labor_certification_applications_large": "",
+    "mental_healths_large": "",
+    "museum_artifact_large": "",
+    "organ_transplant_large": "",
+    "planets_data_large": "",
+    "polar_equipment_large": "",
+    "residential_data_large": "",
+    "reverse_logistics_large": "",
+    "robot_fault_prediction_large": "",
+    "solar_panel_large": "",
+    "sports_events_large": "",
+    "virtual_idol_large": "",
+}
+
 
 def connect_to_database(host: str, port: int = 5432, user: str = "root", password: str = "123123") -> psycopg2.extensions.connection:
     """Connect to PostgreSQL database"""
@@ -390,8 +412,8 @@ def main():
                        help="Show detailed table information")
     parser.add_argument("--all-tables", action="store_true", 
                        help="Show all tables (use with --detailed)")
-    parser.add_argument("--version", choices=["lite", "full"], 
-                       help="Specify version to check against expected databases (lite/full)")
+    parser.add_argument("--version", choices=["lite", "full", "large"],
+                       help="Specify version to check against expected databases (lite/full/large)")
     
     args = parser.parse_args()
     
@@ -400,7 +422,14 @@ def main():
     # Determine expected mapping based on host or version
     expected_mapping = None
     if args.version:
-        expected_mapping = EXPECTED_DATABASES_LITE if args.version == "lite" else EXPECTED_DATABASES_FULL
+        if args.version == "lite":
+            expected_mapping = EXPECTED_DATABASES_LITE
+        elif args.version == "full":
+            expected_mapping = EXPECTED_DATABASES_FULL
+        else:
+            expected_mapping = EXPECTED_DATABASES_LARGE
+    elif "large" in args.host:
+        expected_mapping = EXPECTED_DATABASES_LARGE
     elif "postgresql_base_full" in args.host:
         expected_mapping = EXPECTED_DATABASES_FULL
     elif "postgresql" in args.host:
@@ -437,10 +466,11 @@ def main():
     
     # Provide some guidance
     if expected_mapping:
-        expected_total_tables = sum(len(tables.split()) for tables in expected_mapping.values())
+        expected_total_tables = sum(len(tables.split()) for tables in expected_mapping.values() if tables)
         print(f"\n💡 Expected Results for {args.version or 'detected version'}:")
         print(f"   - Expected databases: {len(expected_mapping)}")
-        print(f"   - Expected total tables: {expected_total_tables}")
+        if expected_total_tables > 0:
+            print(f"   - Expected total tables: {expected_total_tables}")
         print("   - If you see significantly fewer tables or rows, check Docker logs for errors")
         print("   - Average rows per table should be > 0 for populated databases")
 

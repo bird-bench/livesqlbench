@@ -28,6 +28,10 @@
 
 ## News
 
+- 🔥🔥🔥 **[2026-03-02]** We are pleased to release <a href="https://huggingface.co/datasets/birdsql/livesqlbench-large-v1" target="_blank" rel="noopener noreferrer"><b>LiveSQLBench-Large-v1</b></a>, the industrial-scale counterpart with <b>18 databases</b> (~1K columns each) and <b>480 tasks</b>. <b>NEW FEATURES</b>: 10x schema complexity, ~84K avg prompt tokens for long-context challenge, and Business Rule Drift for live context-learning evaluation.
+
+- 🔥 **[2026-02-26]** Thrilled to have our **[BIRD-Interact](https://bird-interact.github.io)**, based on LiveSQLBench, accepted at **ICLR 2026 (Oral)**!
+
 - 🚀 **[2025-10-23]**  **Docker update**: We added the docker for Full DB Env. And we pushed 3 docker images (Base-Lite/Full DB Env and the evaluation environment) to Docker Hub to facilitate the environment setup. No need to download the DB dumps and build the images manually!
 
 - 🔥🔥🔥 **[2025-09-04]** We are pleased to release <a href="https://huggingface.co/datasets/birdsql/livesqlbench-base-full-v1" target="_blank" rel="noopener noreferrer"><b>LiveSQLBench-Base-Full v1</b></a>, a new release with <b>600 NEW tasks</b> over <b>22 NEW real, complex databases</b> with KB docs.<b>NEW FEATURES</b>: more natural, reasoning-intensive user tasks and richer, noisier DB schemas/values. See the <a href="https://huggingface.co/datasets/birdsql/livesqlbench-base-full-v1" target="_blank" rel="noopener noreferrer">dataset</a> and [leaderboard](https://livesqlbench.ai) for details
@@ -62,23 +66,22 @@ Support fast evaluation via PostgreSQL template & docker. Each question includes
 6. **🔄 Truly Live & Hidden Test:**
 New databases and tasks are added over time. Each release features both open development and hidden test phases. The hidden test set from each release becomes the open development set for the next release, ensuring continuous evolution and fair evaluation.
 
-### 🎯 Current Release: LiveSQLBench-Base-Lite and LiveSQLBench-Base-Full
+7. **📈 Business Rule Drift (Live Context-Learning):**
+Business rules embedded in external knowledge can change across releases, requiring models to adapt to updated context rather than relying on memorized patterns.
 
-We have released **LiveSQLBench-Base-Lite** and **LiveSQLBench-Base-Full**, featuring:
-- **New end-user level databases** with complex relationships and noisy schema and data.
-- **New tasks** 
-  - Covering both SELECT-only and Management tasks,
-  - Lite version has straightforward queries, while Full version has more natural, reasoning-intensive queries.
-  - Both versions are **without ambiguity**.
-  - Grounded in external knowledge, with medium to hard complexity SQL statements.
-- **HKB** for multi-hop retrieval and reasoning
+### 🎯 Current Release: LiveSQLBench-Base-Lite, LiveSQLBench-Base-Full v1, and LiveSQLBench-Large-v1
+
+We currently release three versions:
+- **LiveSQLBench-Base-Lite**: 18 end-user level databases and 270 tasks, with straightforward queries and HKB-JSON.
+- **LiveSQLBench-Base-Full v1**: 22 end-user level databases and 600 tasks, with more natural, reasoning-intensive queries and richer/noisier schemas and values.
+- **LiveSQLBench-Large-v1**: 18 industrial-scale databases (~1K columns and ~54 tables per DB) and 480 tasks, featuring 10x schema complexity over Base-Full v1, ~84K avg prompt tokens for long-context challenge, and Business Rule Drift evaluation for live context-learning.
 
 
 ## 📦 Dataset Details
 
 ### Dataset Description
 
-- **Database:** The database can be downloaded from [livesqlbench-base-lite](https://huggingface.co/datasets/birdsql/livesqlbench-base-lite) and [livesqlbench-base-full](https://huggingface.co/datasets/birdsql/livesqlbench-base-full)
+- **Database:** The databases can be downloaded from [livesqlbench-base-lite](https://huggingface.co/datasets/birdsql/livesqlbench-base-lite), [livesqlbench-base-full-v1](https://huggingface.co/datasets/birdsql/livesqlbench-base-full-v1), and [livesqlbench-large-v1](https://huggingface.co/datasets/birdsql/livesqlbench-large-v1)
 - **Data Fields:**
    - `instance_id`: Unique task identifier
    - `selected_database`: Associated database name
@@ -95,8 +98,10 @@ We have released **LiveSQLBench-Base-Lite** and **LiveSQLBench-Base-Full**, feat
 
 **Data viewer**: Explore our data through data viewer in our website [livesqlbench.ai](https://livesqlbench.ai).
 
-🔐 To avoid data leakage by auto-crawling, certain fields (e.g., `sol_sql`, `test_cases`, `external_knowledge`) are excluded from the public dataset `livesqlbench_data.jsonl`. For the full dataset, please email: **[📧 bird.bench25@gmail.com](mailto:bird.bench25@gmail.com)** with subject tag `[livesqlbench-base-lite GT&Test Cases]` for Lite version or `[livesqlbench-base-full-v1 GT&Test Cases]` for Full version, which will be sent automatically.
-
+🔐 To avoid data leakage by auto-crawling, certain fields (e.g., `sol_sql`, `test_cases`, `external_knowledge`) are excluded from the public dataset `livesqlbench_data.jsonl`. For the full dataset, please email: **[📧 bird.bench25@gmail.com](mailto:bird.bench25@gmail.com)** with subject tag 
+- `[livesqlbench-base-lite GT&Test Cases]` for **livesqlbench-base-lite** version or 
+- `[livesqlbench-base-full-v1 GT&Test Cases]` for **livesqlbench-base-full-v1** version or
+- `[livesqlbench-large-v1 GT&Test Cases]` for **livesqlbench-large-v1** version, which will be sent automatically.
 
 
 
@@ -160,6 +165,7 @@ We use **docker** to provide a consistent environment for running the benchmark.
    - Downdload the database dumps 
       - [livesqlbench-base-lite](https://drive.google.com/file/d/1QIGQlRKbkqApAOrQXPqFJgUg8rQ7HRRZ/view). Unzip and rename it as `evaluation/postgre_table_dumps`.
       - [livesqlbench-base-full](https://drive.google.com/file/d/1V9SFIWebi27JtaDUAScG1xE9ELbYcWLR/view). Unzip and rename it as `evaluation/postgre_table_dumps_full`.
+      - [livesqlbench-large-v1](https://drive.google.com/file/d/1u1L-SvJtOZGfcIST-dINw8DnGEQDMu6C/view?usp=sharing). Unzip and rename to `evaluation/postgre_table_dumps_large_v1`.
    - Build the environment manually by running `docker-compose.build.yml`.
       ```bash
       cd evaluation
@@ -184,6 +190,7 @@ We use **docker** to provide a consistent environment for running the benchmark.
    docker compose exec so_eval_env bash
    python check_db_metadata.py --host livesqlbench_postgresql
    python check_db_metadata.py --host livesqlbench_postgresql_base_full
+   python check_db_metadata.py --host livesqlbench_postgresql_large_v1
    ```
    
    Expected results:
@@ -199,6 +206,12 @@ We use **docker** to provide a consistent environment for running the benchmark.
      - 🔢 Total Columns: 2011
      - 📈 Avg Rows per Table: 1,121.19
      - 💾 Total Size: 272.00 MB (around)
+   - **livesqlbench-large-v1**:
+     - 📈 Total Databases: 18
+     - 📋 Total Tables: 971
+     - 🔢 Total Columns: 17,749
+     - 📈 Avg Rows per Table: 2,056.48
+     - 💾 Total Size: 746.33 MB
    
 
 ### Evaluation Run
@@ -211,19 +224,21 @@ bash run_eval.sh
 The output will be save in the [`./evaluation/outputs/final_output/`](./evaluation/outputs/final_output/)
 If you want the log file for each instance, you can set the `--logging` to `true` in the `run_eval.sh` script.
 
-## 💨 Quick Eval (LiveSQLBench-Base-Full)
+## 💨 Quick Eval (LiveSQLBench-Base-Full and LiveSQLBench-Large-v1)
 
 Similar to the above, but do the following changes:
 
-1. Change the databaes metafiles and livesqlbench_data.jsonl to the full version from [huggingface](https://huggingface.co/datasets/birdsql/livesqlbench-base-full-v1).
+1. Change the databaes metafiles and data.jsonl to the version from [livesqlbenc-base-full-v1](https://huggingface.co/datasets/birdsql/livesqlbench-base-full-v1) or [livesqlbench-large-v1](https://huggingface.co/datasets/birdsql/livesqlbench-large-v1).
 2. Use the new data to generate the prompts and then use the new generated prompt get LLM outputs and then postprocess it.
-3. When running the evaluation, you need to set the database host to `livesqlbench_postgresql_base_full`:
+3. When running the evaluation, you need to set the database host to `livesqlbench_postgresql_base_full` for livesqlbench-base-full-v1 and `livesqlbench_postgresql_large_v1` for livesqlbench-large-v1:
 ```bash
 docker compose exec so_eval_env bash
 cd run
-jsonl_file=<path_to_the_full_set_postprocessed_jsonl_file>
-python3 /app/src/evaluation.py --jsonl_file $jsonl_file  --db_host "postgresql_base_full"
+jsonl_file=<path_to_your_postprocessed_jsonl_file>
+python3 /app/src/evaluation.py --jsonl_file $jsonl_file --db_host "livesqlbench_postgresql_base_full" # for livesqlbench-base-full-v1
+python3 /app/src/evaluation.py --jsonl_file $jsonl_file --db_host "livesqlbench_postgresql_large_v1" # for livesqlbench-large-v1
 ```
+
 
 
 ## 📊 Model Performance on LiveSQLBench

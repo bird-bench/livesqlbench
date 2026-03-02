@@ -29,6 +29,20 @@ services:
     ports:
       - "5433:5432"
 
+  postgresql_large_v1:
+    build:
+      context: .
+      dockerfile: env/Dockerfile.postgresql_large_v1
+    container_name: livesqlbench_postgresql_large_v1
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: 123123
+      TZ: "Asia/Hong_Kong"
+    volumes:
+      - postgresql_large_v1_data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+
   so_eval_env:
     build:
       context: .
@@ -39,8 +53,10 @@ services:
     depends_on:
       - postgresql
       - postgresql_base_full
+      - postgresql_large_v1
     command: ["tail", "-f", "/dev/null"]
 
 volumes:
   postgresql_data:
   postgresql_base_full_data:
+  postgresql_large_v1_data:
