@@ -128,7 +128,7 @@ def execute_test_cases(
 
     for i, test_case in enumerate(test_cases, start=1):
         logger.info(f"Starting test case {i}/{len(test_cases)}")
-        if MULTI_THREAD:
+        if False: # TODO: by default, we don't use multi-threading for test cases, since multiple test cases may have cross-impact. And it may report error about `conn` being input to multiple processes.
             p = multiprocessing.Process(
                 target=run_test_case,
                 args=(
