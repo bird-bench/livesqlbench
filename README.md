@@ -235,8 +235,7 @@ Similar to the above, but do the following changes:
 docker compose exec so_eval_env bash
 cd run
 jsonl_file=<path_to_your_postprocessed_jsonl_file>
-python3 /app/src/evaluation.py --jsonl_file $jsonl_file --db_host "livesqlbench_postgresql_base_full" # for livesqlbench-base-full-v1
-python3 /app/src/evaluation.py --jsonl_file $jsonl_file --db_host "livesqlbench_postgresql_large_v1" # for livesqlbench-large-v1
+python3 /app/src/evaluation.py --jsonl_file $jsonl_file --db_host "livesqlbench_postgresql_base_full" # Or --db_host "livesqlbench_postgresql_large_v1" for livesqlbench-large-v1
 ```
 
 
