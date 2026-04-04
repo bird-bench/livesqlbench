@@ -28,6 +28,8 @@
 
 ## News
 
+- 🚀 **[2026-04-04]** We release **[LiveSQLBench-Agent](./LiveSQLBench-Agent/)**, a Google ADK-based text-to-SQL agent framework with multi-provider LLM support, per-task DB isolation, and parallel execution. Check the [README](./LiveSQLBench-Agent/README.md) for details.
+
 - 🔥🔥🔥 **[2026-03-02]** We are pleased to release <a href="https://huggingface.co/datasets/birdsql/livesqlbench-large-v1" target="_blank" rel="noopener noreferrer"><b>LiveSQLBench-Large-v1</b></a>, the industrial-scale counterpart with <b>18 databases</b> (~1K columns each) and <b>480 tasks</b>. <b>NEW FEATURES</b>: 10x schema complexity, ~84K avg prompt tokens for long-context challenge, and Business Rule Drift for live context-learning evaluation.
 
 - 🔥 **[2026-02-26]** Thrilled to have our **[BIRD-Interact](https://bird-interact.github.io)**, based on LiveSQLBench, accepted at **ICLR 2026 (Oral)**!
@@ -238,6 +240,21 @@ jsonl_file=<path_to_your_postprocessed_jsonl_file>
 python3 /app/src/evaluation.py --jsonl_file $jsonl_file --db_host "livesqlbench_postgresql_base_full" # Or --db_host "livesqlbench_postgresql_large_v1" for livesqlbench-large-v1
 ```
 
+
+
+## 🤖 LiveSQLBench-Agent
+
+We also provide **LiveSQLBench-Agent**, a Google ADK-based text-to-SQL agent framework under [`LiveSQLBench-Agent/`](./LiveSQLBench-Agent/). The agent iteratively explores the database through tools (schema inspection, column meanings, external knowledge, SQL execution) before submitting a final answer.
+
+**Key features:**
+- **Microservices architecture**: System Agent + DB Environment + Orchestrator
+- **Multi-provider LLM support** via LiteLlm (Anthropic, OpenAI, Ollama, etc.)
+- **Per-task DB isolation** with PostgreSQL template-based cloning
+- **Parallel execution** with configurable concurrency
+- **Step-based budget enforcement** (default 30 steps per task)
+- **HTML report generation** with tool trajectory visualization
+
+Please refer to the [LiveSQLBench-Agent README](./LiveSQLBench-Agent/README.md) for setup and usage instructions.
 
 
 ## 📊 Model Performance on LiveSQLBench
