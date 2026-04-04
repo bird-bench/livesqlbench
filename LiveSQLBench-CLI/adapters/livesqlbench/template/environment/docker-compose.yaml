@@ -1,0 +1,32 @@
+services:
+  main:
+    image: livesqlbench-main-openhands:latest
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    command: ["sh", "-c", "sleep infinity"]
+    stdin_open: true
+    tty: true
+    environment:
+      PGHOST: postgresql
+      PGPORT: "5432"
+      PGUSER: root
+      PGPASSWORD: "123123"
+
+    volumes:
+      - ./db_assets:/app/db_assets:ro
+      - ./documents:/app/documents:ro
+
+  postgresql:
+    image: ${LSB_PG_IMAGE:-livesqlbench-postgresql:latest}
+    pull_policy: never
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: "123123"
+    volumes:
+      - ./db_assets:/docker-entrypoint-initdb.d/db_assets:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root"]
+      interval: 5s
+      timeout: 5s
+      retries: 10

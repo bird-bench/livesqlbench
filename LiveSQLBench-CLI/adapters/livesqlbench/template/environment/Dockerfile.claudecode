@@ -1,0 +1,36 @@
+ARG MAIN_BASE_IMAGE=python:3.10-slim
+FROM ${MAIN_BASE_IMAGE}
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PATH="/root/.local/bin:${PATH}"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    postgresql-client \
+    curl \
+    ca-certificates \
+    gnupg \
+    bash \
+    procps \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js once at build time
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get update && apt-get install -y --no-install-recommends nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+# # Install Claude Code once at build time
+# RUN curl -fsSL https://claude.ai/install.sh | bash \
+#     && /root/.local/bin/claude --version \
+#     && ln -sf /root/.local/bin/claude /usr/local/bin/claude
+
+# Install pinned Claude Code version via npm, and remove native installer binary if present
+RUN rm -f /root/.local/bin/claude \
+    && npm install -g @anthropic-ai/claude-code@2.1.22 \
+    && hash -r || true \
+    && which claude \
+    && claude --version
+
+COPY environment/requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+
+WORKDIR /app

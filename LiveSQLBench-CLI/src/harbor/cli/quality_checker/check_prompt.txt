@@ -1,0 +1,29 @@
+You are reviewing a Harbor task for quality and completeness. Judge whether the task's artifacts meet the criteria below, and provide a short rationale for each.
+
+<environment_files>
+{environment_files}
+</environment_files>
+
+<instruction.md>
+{instruction}
+</instruction.md>
+
+<solution/solve.sh>
+{solution}
+</solution/solve.sh>
+
+<tests/*>
+{test_script}
+</tests/*>
+
+Guidance:
+{criteria_guidance}
+
+Output requirements (strict):
+- Respond with a single JSON object only (no prose outside JSON).
+- Each key below must be present and map to an object: {{ outcome, explanation }}.
+- outcome must be one of: "pass" | "fail" | "not_applicable" (lowercase).
+- explanation should be concise and reference specific evidence from the provided files where possible.
+
+Return exactly this JSON structure:
+{json_structure}

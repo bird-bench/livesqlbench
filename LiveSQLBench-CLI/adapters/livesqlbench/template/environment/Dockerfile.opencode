@@ -1,0 +1,32 @@
+ARG MAIN_BASE_IMAGE=python:3.10-slim
+FROM ${MAIN_BASE_IMAGE}
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    postgresql-client \
+    curl \
+    ca-certificates \
+    gnupg \
+    bash \
+    procps \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js once at build time, and verify node/npm exist
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends nodejs \
+    && node --version \
+    && npm --version \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install OpenCode once at build time
+RUN npm install -g opencode-ai@latest \
+    && npm cache clean --force \
+    && command -v opencode \
+    && opencode --version
+
+COPY environment/requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+
+WORKDIR /app
