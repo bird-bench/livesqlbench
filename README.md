@@ -28,6 +28,8 @@
 
 ## News
 
+- 🖥️ **[2026-04-04]** We release **[LiveSQLBench-CLI](./LiveSQLBench-CLI/)**, a Harbor-based evaluation framework for benchmarking CLI-based agents (OpenHands, Claude Code, Aider, etc.) on LiveSQLBench tasks via terminal interactions. Supports both base-lite and base-full-v1 datasets. Check the [README](./LiveSQLBench-CLI/README.md) for details.
+
 - 🚀 **[2026-04-04]** We release **[LiveSQLBench-Agent](./LiveSQLBench-Agent/)**, a Google ADK-based text-to-SQL agent framework with multi-provider LLM support, per-task DB isolation, and parallel execution. Check the [README](./LiveSQLBench-Agent/README.md) for details.
 
 - 🔥🔥🔥 **[2026-03-02]** We are pleased to release <a href="https://huggingface.co/datasets/birdsql/livesqlbench-large-v1" target="_blank" rel="noopener noreferrer"><b>LiveSQLBench-Large-v1</b></a>, the industrial-scale counterpart with <b>18 databases</b> (~1K columns each) and <b>480 tasks</b>. <b>NEW FEATURES</b>: 10x schema complexity, ~84K avg prompt tokens for long-context challenge, and Business Rule Drift for live context-learning evaluation.
@@ -255,6 +257,19 @@ We also provide **LiveSQLBench-Agent**, a Google ADK-based text-to-SQL agent fra
 - **HTML report generation** with tool trajectory visualization
 
 Please refer to the [LiveSQLBench-Agent README](./LiveSQLBench-Agent/README.md) for setup and usage instructions.
+
+
+## 🖥️ LiveSQLBench-CLI
+
+We provide **LiveSQLBench-CLI**, a [Harbor](https://github.com/harbor-framework/harbor)-based evaluation framework under [`LiveSQLBench-CLI/`](./LiveSQLBench-CLI/) for benchmarking CLI-based agents on LiveSQLBench text-to-SQL tasks. Agents interact with the database environment solely through bash commands in a sandboxed terminal.
+
+**Key features:**
+- **CLI-based agent support**: OpenHands, Claude Code, Aider, Codex, Gemini CLI, and more
+- **Terminal-only interaction**: Agents explore schemas, query databases, and submit SQL entirely via bash
+- **Per-task isolation**: Each task runs in its own Docker container with a dedicated PostgreSQL instance
+- **Supports all datasets**: LiveSQLBench-Base-Lite and Base-Full v1
+
+Please refer to the [LiveSQLBench-CLI README](./LiveSQLBench-CLI/README.md) for setup and usage instructions.
 
 
 ## 📊 Model Performance on LiveSQLBench
