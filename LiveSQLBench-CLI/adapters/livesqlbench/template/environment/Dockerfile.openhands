@@ -1,0 +1,39 @@
+ARG MAIN_BASE_IMAGE=python:3.10-slim
+FROM ${MAIN_BASE_IMAGE}
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PATH="/root/.local/bin:${PATH}"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    postgresql-client \
+    curl \
+    ca-certificates \
+    bash \
+    procps \
+    build-essential \
+    tmux \
+    && rm -rf /var/lib/apt/lists/*
+
+# Benchmark/task Python deps go into the default container Python
+COPY environment/requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+
+# Install uv
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
+    && /root/.local/bin/uv --version \
+    && ln -sf /root/.local/bin/uv /usr/local/bin/uv
+
+# OpenHands requires Python 3.12+
+RUN uv python install 3.12 \
+    && uv venv /opt/openhands-venv --python 3.12
+
+# Install only OpenHands into its own env
+RUN . /opt/openhands-venv/bin/activate \
+    && export SKIP_VSCODE_BUILD=true \
+    && uv pip install openhands-ai \
+    && /opt/openhands-venv/bin/python -m openhands.core.main --version
+
+# Expose only the OpenHands launcher globally, not the whole venv
+RUN ln -sf /opt/openhands-venv/bin/openhands /usr/local/bin/openhands
+
+WORKDIR /app

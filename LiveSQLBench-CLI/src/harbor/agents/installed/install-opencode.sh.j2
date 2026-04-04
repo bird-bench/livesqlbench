@@ -1,0 +1,21 @@
+#!/bin/bash
+set -euo pipefail
+
+# Ensure opencode exists
+if ! command -v opencode >/dev/null 2>&1; then
+    echo "OpenCode is not installed in this image"
+    exit 1
+fi
+
+echo "OpenCode version:"
+opencode --version
+
+CONFIG_PATH="/app/opencode.json"
+
+echo "Writing OpenCode config to $CONFIG_PATH"
+
+cat > "$CONFIG_PATH" <<'EOF'
+# Your opencode configuration
+EOF
+
+echo "OpenCode configuration written."

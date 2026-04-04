@@ -1,0 +1,10 @@
+#!/bin/bash
+set -euo pipefail
+
+if [ -x /opt/openhands-venv/bin/python ]; then
+    /opt/openhands-venv/bin/python -m openhands.core.main --version
+    exit 0
+fi
+
+echo "OpenHands is not preinstalled"
+exit 1
