@@ -1,5 +1,6 @@
-# Dockerfile.postgresql_large
-FROM postgres:14.12
+# Large-v1 dumps are often from newer pg_dump; use 18+ for clean restores (see LiveSQLBench-CLI build_db_images.sh).
+ARG POSTGRES_BASE_IMAGE=postgres:18
+FROM ${POSTGRES_BASE_IMAGE}
 
 # Set up environment variables for user and password only
 ENV POSTGRES_USER=root
