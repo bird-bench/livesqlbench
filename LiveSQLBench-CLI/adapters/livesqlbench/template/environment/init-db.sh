@@ -1,9 +1,10 @@
 #!/bin/bash
 set -euo pipefail
 
-SELECTED_DB_FILE="/docker-entrypoint-initdb.d/db_assets/db_name.txt"
-DB_DUMP_DIR="/docker-entrypoint-initdb.d/db_assets/db_dump"
-PREPROCESS_SQL_FILE="/docker-entrypoint-initdb.d/db_assets/preprocess.sql"
+SELECTED_DB_FILE="${SELECTED_DB_FILE:-/docker-entrypoint-initdb.d/db_assets/db_name.txt}"
+DB_DUMP_DIR="${DB_DUMP_DIR:-/docker-entrypoint-initdb.d/db_assets/db_dump}"
+PREPROCESS_SQL_FILE="${PREPROCESS_SQL_FILE:-/docker-entrypoint-initdb.d/db_assets/preprocess.sql}"
+TABLE_ORDER_FILE="${TABLE_ORDER_FILE:-/docker-entrypoint-initdb.d/db_assets/table_order.txt}"
 
 declare -A DATABASE_MAPPING=(
     ["archeology_scan_template"]="projects personnel sites equipment scans environment pointcloud mesh spatial features conservation registration processing qualitycontrol"
@@ -92,17 +93,37 @@ import_dump_into_database() {
     : > /tmp/init-db-errors.log
     shopt -s nullglob
 
-    local full_dumps=("$source_dir"/*_full.sql)
-    if (( ${#full_dumps[@]} > 0 )); then
-        for dump_file in "${full_dumps[@]}"; do
+    local selected_database="${target_db%_template}"
+    local exact_full_dumps=()
+    local candidate
+    for candidate in \
+        "$source_dir/${selected_database}_full.sql" \
+        "$source_dir/${target_db}_full.sql"; do
+        if [[ -f "$candidate" ]]; then
+            exact_full_dumps+=("$candidate")
+        fi
+    done
+
+    if (( ${#exact_full_dumps[@]} > 0 )); then
+        for dump_file in "${exact_full_dumps[@]}"; do
             echo "[init-db.sh] Restoring full dump: $(basename "$dump_file")"
-            psql -v ON_ERROR_STOP=1 \
+            if ! psql -v ON_ERROR_STOP=1 \
                 --username "$POSTGRES_USER" \
                 --dbname "$target_db" \
                 -f "$dump_file" \
-                2>>/tmp/init-db-errors.log
+                2>>/tmp/init-db-errors.log; then
+                echo "[init-db.sh] ERROR: Failed restoring full dump: $(basename "$dump_file")" >&2
+                cat /tmp/init-db-errors.log >&2
+                return 1
+            fi
         done
         return
+    fi
+
+    local full_dumps=("$source_dir"/*_full.sql)
+    if (( ${#full_dumps[@]} > 0 )); then
+        echo "[init-db.sh] Ignoring non-matching full dump files for $target_db:"
+        printf '  - %s\n' "${full_dumps[@]##*/}"
     fi
 
     local all_dumps=("$source_dir"/*.sql)
@@ -111,7 +132,14 @@ import_dump_into_database() {
         exit 1
     fi
 
-    local mapped_tables_string="${DATABASE_MAPPING[$target_db]:-}"
+    local mapped_tables_string=""
+    if [[ -s "$TABLE_ORDER_FILE" ]]; then
+        mapped_tables_string="$(tr '\n' ' ' < "$TABLE_ORDER_FILE")"
+        echo "[init-db.sh] Using external table order file: $TABLE_ORDER_FILE"
+    else
+        mapped_tables_string="${DATABASE_MAPPING[$target_db]:-}"
+    fi
+
     if [[ -n "$mapped_tables_string" ]]; then
         echo "[init-db.sh] Using DATABASE_MAPPING for restore order: $target_db"
 
@@ -137,11 +165,15 @@ import_dump_into_database() {
             fi
 
             echo "[init-db.sh] Restoring table dump: $(basename "$dump_file")"
-            psql -v ON_ERROR_STOP=1 \
+            if ! psql -v ON_ERROR_STOP=1 \
                 --username "$POSTGRES_USER" \
                 --dbname "$target_db" \
                 -f "$dump_file" \
-                2>>/tmp/init-db-errors.log
+                2>>/tmp/init-db-errors.log; then
+                echo "[init-db.sh] ERROR: Failed restoring table dump: $(basename "$dump_file")" >&2
+                cat /tmp/init-db-errors.log >&2
+                return 1
+            fi
         done
 
         echo "[init-db.sh] Skipping unmapped dump files in $source_dir"
@@ -161,15 +193,8 @@ import_dump_into_database() {
         return
     fi
 
-    echo "[init-db.sh] No DATABASE_MAPPING found for $target_db; restoring in alphabetical order"
-    for dump_file in "${all_dumps[@]}"; do
-        echo "[init-db.sh] Restoring table dump: $(basename "$dump_file")"
-        psql -v ON_ERROR_STOP=1 \
-            --username "$POSTGRES_USER" \
-            --dbname "$target_db" \
-            -f "$dump_file" \
-            2>>/tmp/init-db-errors.log
-    done
+    echo "[init-db.sh] ERROR: No DATABASE_MAPPING found for $target_db" >&2
+    exit 1
 }
 
 create_template_database() {
@@ -197,6 +222,15 @@ CREATE DATABASE "$selected_database" WITH TEMPLATE "$template_database";
 EOSQL
 
     echo "[init-db.sh] Agent database ready: $selected_database"
+}
+
+template_database_exists() {
+    local selected_database="$1"
+    local template_database="${selected_database}_template"
+
+    psql -tA -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname postgres \
+        -c "SELECT 1 FROM pg_database WHERE datname='${template_database}'" \
+        | grep -q '^1$'
 }
 
 execute_preprocess_sqls() {
@@ -227,11 +261,18 @@ execute_preprocess_sqls() {
     echo "[init-db.sh] ✓ Preprocess SQL executed successfully"
 }
 
-SELECTED_DATABASE="$(read_selected_database)"
+main() {
+    local selected_database
+    selected_database="$(read_selected_database)"
 
-echo "[init-db.sh] Initializing databases for: $SELECTED_DATABASE"
-create_template_database "$SELECTED_DATABASE"
-clone_template_to_agent_database "$SELECTED_DATABASE"
-execute_preprocess_sqls "$SELECTED_DATABASE"
+    echo "[init-db.sh] Initializing databases for: $selected_database"
+    create_template_database "$selected_database"
+    clone_template_to_agent_database "$selected_database"
+    execute_preprocess_sqls "$selected_database"
 
-echo "[init-db.sh] Database initialization finished: $SELECTED_DATABASE"
+    echo "[init-db.sh] Database initialization finished: $selected_database"
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    main "$@"
+fi

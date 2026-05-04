@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     postgresql-client \
     curl \
     ca-certificates \
+    gnupg \
     bash \
     procps \
     build-essential \
@@ -35,5 +36,18 @@ RUN . /opt/openhands-venv/bin/activate \
 
 # Expose only the OpenHands launcher globally, not the whole venv
 RUN ln -sf /opt/openhands-venv/bin/openhands /usr/local/bin/openhands
+
+# Install Node.js and Codex CLI once at image build time so `-a codex` does not
+# reinstall them for every task when using this default agent image.
+ARG CODEX_VERSION=latest
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends nodejs \
+    && node --version \
+    && npm --version \
+    && npm install -g "@openai/codex@${CODEX_VERSION}" \
+    && npm cache clean --force \
+    && codex --version \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

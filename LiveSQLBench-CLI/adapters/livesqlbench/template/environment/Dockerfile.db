@@ -1,21 +1,33 @@
-FROM postgres:14.12
-
-# Build argument for which database this image is for
-ARG DATABASE_NAME=solar_panel_large
+ARG POSTGRES_BASE_IMAGE=postgres:14.12
+FROM ${POSTGRES_BASE_IMAGE}
 
 # Set PostgreSQL credentials
 ENV POSTGRES_USER=root
 ENV POSTGRES_PASSWORD=123123
+ENV PGDATA=/var/lib/postgresql/livesqlbench-data
 
-# Copy the shared initialization script
-COPY environment/init-db.sh /docker-entrypoint-initdb.d/init-db.sh
+# Copy scripts and build-time seed assets
+COPY environment/init-db.sh /usr/local/bin/livesqlbench-init-db.sh
+COPY environment/bootstrap-db-image.sh /usr/local/bin/livesqlbench-bootstrap-db-image.sh
+COPY environment/db-entrypoint.sh /usr/local/bin/livesqlbench-db-entrypoint.sh
+COPY db_seed /opt/livesqlbench/db_seed
 
-# Set permissions
-RUN chmod +x /docker-entrypoint-initdb.d/init-db.sh && \
-    mkdir -p /docker-entrypoint-initdb.d/db_assets && \
-    chmod 755 /docker-entrypoint-initdb.d/db_assets && \
-    echo "[Dockerfile] Built for DATABASE: ${DATABASE_NAME}"
-WORKDIR /docker-entrypoint-initdb.d
+RUN chmod +x /usr/local/bin/livesqlbench-init-db.sh \
+    /usr/local/bin/livesqlbench-bootstrap-db-image.sh \
+    /usr/local/bin/livesqlbench-db-entrypoint.sh \
+    && mkdir -p "${PGDATA}" /docker-entrypoint-initdb.d/db_assets \
+    && touch /opt/livesqlbench/db_seed/preprocess.sql \
+    && chown -R postgres:postgres /usr/local/bin/livesqlbench-init-db.sh \
+        /usr/local/bin/livesqlbench-bootstrap-db-image.sh \
+        /usr/local/bin/livesqlbench-db-entrypoint.sh \
+        /opt/livesqlbench \
+        /docker-entrypoint-initdb.d \
+        /var/lib/postgresql \
+    && gosu postgres /usr/local/bin/livesqlbench-bootstrap-db-image.sh
+
+USER postgres
+ENTRYPOINT ["/usr/local/bin/livesqlbench-db-entrypoint.sh"]
+CMD ["postgres"]
 
 # Health check: verify PostgreSQL is running
 HEALTHCHECK --interval=10s --timeout=5s --start-period=60s --retries=30 \
