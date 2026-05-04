@@ -393,10 +393,6 @@ class LiveSQLBenchAdapter:
         if not source.exists():
             raise FileNotFoundError(f"Database asset directory not found: {source}")
 
-        dump_source = self.db_dump_root / f"{selected_database}_template"
-        if not dump_source.exists():
-            raise FileNotFoundError(f"Database dump directory not found: {dump_source}")
-
         destination = output_dir / "environment" / "db_assets"
         destination.parent.mkdir(parents=True, exist_ok=True)
         if destination.exists():
@@ -410,13 +406,6 @@ class LiveSQLBenchAdapter:
         preprocess_sql_path = destination / "preprocess.sql"
         preprocess_sql_path.write_text(preprocess_sql_blob + "\n", encoding="utf-8")
 
-        dump_destination = destination / "db_dump"
-        shutil.copytree(dump_source, dump_destination)
-
-        order_source = self.db_dump_root / f"{selected_database}_table_orders.txt"
-        order_destination = destination / "table_order.txt"
-        if order_source.exists():
-            shutil.copy2(order_source, order_destination)
 
     def _document_template_context(self, record: dict[str, Any]) -> dict[str, str]:
         instance_id = str(record.get("instance_id", ""))
