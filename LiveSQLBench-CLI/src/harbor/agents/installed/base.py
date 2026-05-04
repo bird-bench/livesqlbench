@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import shlex
 from pathlib import Path
 
 from jinja2 import Environment
@@ -153,8 +154,10 @@ class BaseInstalledAgent(BaseAgent, ABC):
                 env = dict(exec_input.env) if exec_input.env else {}
                 env.update(self._extra_env)
 
+            command = f"bash -o pipefail -c {shlex.quote(exec_input.command)}"
+
             result = await environment.exec(
-                command=exec_input.command,
+                command=command,
                 cwd=exec_input.cwd,
                 env=env,
                 timeout_sec=exec_input.timeout_sec,
@@ -167,5 +170,11 @@ class BaseInstalledAgent(BaseAgent, ABC):
 
             if result.stderr:
                 (command_dir / "stderr.txt").write_text(result.stderr)
+
+            if result.return_code != 0:
+                raise RuntimeError(
+                    f"Agent command {i} failed with exit code {result.return_code}. "
+                    f"See logs in {command_dir}"
+                )
 
         self.populate_context_post_run(context)

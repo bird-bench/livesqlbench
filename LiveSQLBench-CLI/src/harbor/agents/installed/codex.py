@@ -552,7 +552,7 @@ ln -sf /tmp/codex-secrets/auth.json "$CODEX_HOME/auth.json"
             ExecInput(
                 command=(
                     "trap 'rm -rf /tmp/codex-secrets \"$CODEX_HOME/auth.json\"' EXIT TERM INT; "
-                    ". ~/.nvm/nvm.sh; "
+                    'if [ -s "$HOME/.nvm/nvm.sh" ]; then . "$HOME/.nvm/nvm.sh"; fi; '
                     "codex exec "
                     "--dangerously-bypass-approvals-and-sandbox "
                     "--skip-git-repo-check "
@@ -562,9 +562,8 @@ ln -sf /tmp/codex-secrets/auth.json "$CODEX_HOME/auth.json"
                     f"{reasoning_flag}"
                     "-- "  # end of flags
                     f"{escaped_instruction} "
-                    f"2>&1 </dev/null | stdbuf -oL tee {
-                        EnvironmentPaths.agent_dir / self._OUTPUT_FILENAME
-                    }"
+                    f"2>&1 </dev/null | stdbuf -oL tee "
+                    f"{EnvironmentPaths.agent_dir / self._OUTPUT_FILENAME}"
                 ),
                 env=env,
             ),

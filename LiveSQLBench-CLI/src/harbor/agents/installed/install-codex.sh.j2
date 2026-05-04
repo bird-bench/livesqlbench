@@ -1,6 +1,11 @@
 #!/bin/bash
 set -euo pipefail
 
+if command -v codex >/dev/null 2>&1; then
+    codex --version
+    exit 0
+fi
+
 apt-get update
 apt-get install -y curl
 
