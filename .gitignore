@@ -41,6 +41,7 @@ livesqlbench-base-lite
 
 # Exp outputs 
 evaluation/outputs/
+evaluation/*outputs/
 
 # DB dumps 
 postgre_table_dumps
@@ -52,3 +53,6 @@ baseline/src/config.py
 prompts/
 
 
+
+analysis_results/
+analysis_results_combined/
