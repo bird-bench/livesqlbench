@@ -22,17 +22,62 @@ logger = logging.getLogger(__name__)
 def _default_output_dir() -> Path:
     return HARBOR_ROOT / "datasets" / "livesqlbench"
 
+def _first_existing_path(*paths: Path) -> Path:
+    for path in paths:
+        if path.exists():
+            return path
+    return paths[0]
+
 def _default_data_root() -> Path:
-    return WORKSPACE_ROOT / "data" / "livesqlbench-base-lite"
+    return _first_existing_path(
+        HARBOR_ROOT / "data" / "livesqlbench-base-lite",
+        WORKSPACE_ROOT / "data" / "livesqlbench-base-lite",
+        WORKSPACE_ROOT / "livesqlbench-base-lite",
+    )
+
+def _find_data_jsonl(data_root: Path) -> Path:
+    default_path = data_root / "livesqlbench_data.jsonl"
+    if default_path.exists():
+        return default_path
+
+    candidates = sorted(
+        path
+        for path in data_root.glob("*data*.jsonl")
+        if path.is_file()
+        and not path.name.endswith(".bak")
+        and "gt" not in path.name.lower()
+        and "testcase" not in path.name.lower()
+    )
+    if candidates:
+        return candidates[0]
+
+    return default_path
+
+def _find_gt_jsonl(data_root: Path) -> Path | None:
+    candidates = sorted(
+        path
+        for path in data_root.glob("*gt*.jsonl")
+        if path.is_file() and not path.name.endswith(".bak")
+    )
+    if candidates:
+        return candidates[0]
+    return None
 
 def _default_data_jsonl() -> Path:
-    return _default_data_root() / "livesqlbench_data.jsonl"
+    return _find_data_jsonl(_default_data_root())
 
 def _default_eval_src() -> Path:
-    return WORKSPACE_ROOT / "evaluation" / "src"
+    return _first_existing_path(
+        HARBOR_ROOT / "evaluation" / "src",
+        WORKSPACE_ROOT / "evaluation" / "src",
+    )
 
 def _default_db_dump_root() -> Path:
-    return WORKSPACE_ROOT / "evaluation" / "postgre_table_dumps"
+    return _first_existing_path(
+        HARBOR_ROOT / "data" / "postgre_table_dumps",
+        WORKSPACE_ROOT / "postgre_table_dumps",
+        WORKSPACE_ROOT / "evaluation" / "postgre_table_dumps",
+    )
 
 def _read_ids_from_file(path: Path) -> list[str]:
     lines: list[str] = []
@@ -54,6 +99,18 @@ def _parse_args() -> argparse.Namespace:
         type=Path,
         default=_default_data_root(),
         help="Path to livesqlbench data folder directory",
+    )
+    parser.add_argument(
+        "--data-jsonl",
+        type=Path,
+        default=None,
+        help="Path to the source task JSONL. Defaults to livesqlbench_data.jsonl or the first *data*.jsonl under --data-root.",
+    )
+    parser.add_argument(
+        "--gt-jsonl",
+        type=Path,
+        default=None,
+        help="Optional JSONL with solution/testcase patches. Defaults to the first *gt*.jsonl under --data-root if present.",
     )
     parser.add_argument(
         "--agent-image",
@@ -122,13 +179,8 @@ def _collect_ids(ids_cli: Iterable[str] | None, ids_file: Path | None) -> list[s
 def main() -> None:
     args = _parse_args()
 
-    if args.data_root:
-        default_gt = args.data_root / "livesqlbench_data.jsonl"
-        data_jsonl = args.data_root / "livesqlbench_data.jsonl"
-    else:
-        default_gt = _default_data_jsonl()
-    if default_gt.exists():
-        gt_jsonl = default_gt
+    data_jsonl = args.data_jsonl or _find_data_jsonl(args.data_root)
+    gt_jsonl = args.gt_jsonl if args.gt_jsonl is not None else _find_gt_jsonl(args.data_root)
 
     output_dir = args.output_dir.resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -137,7 +189,7 @@ def main() -> None:
         task_dir=output_dir,
         data_jsonl=data_jsonl.resolve(),
         data_root=args.data_root.resolve(),
-        gt_jsonl=gt_jsonl.resolve(),
+        gt_jsonl=gt_jsonl.resolve() if gt_jsonl is not None else None,
         eval_src_dir=args.eval_src_dir.resolve(),
         db_dump_root=args.db_dump_root.resolve(),
         agent_image=args.agent_image,
