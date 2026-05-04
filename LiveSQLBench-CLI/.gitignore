@@ -225,3 +225,6 @@ dataset
 
 # Viewer static files (built in CI)
 src/harbor/viewer/static/
+
+# Teammate-only runbook (not for public remote)
+README.internal.md
