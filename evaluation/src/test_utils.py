@@ -123,9 +123,9 @@ def process_decimals_recursive(item, decimal_places):
     quantizer = Decimal(1).scaleb(-decimal_places)
     
     if isinstance(item, Decimal):
-        return item.quantize(quantizer, rounding=ROUND_HALF_UP)
+        return float(item.quantize(quantizer, rounding=ROUND_HALF_UP))
     elif isinstance(item, float):
-        return round(item, decimal_places)
+        return float(Decimal(str(item)).quantize(quantizer, rounding=ROUND_HALF_UP))
     elif isinstance(item, (list, tuple)):
         return type(item)(process_decimals_recursive(x, decimal_places) for x in item)
     elif isinstance(item, dict):
@@ -159,11 +159,46 @@ def preprocess_results(results, decimal_places=2):
     return processed
 
 
+# def remove_distinct(sql_list):
+#     """
+#     Remove all occurrences of the DISTINCT keyword (in any case form)
+#     from a single list of SQL query strings. This is a brute-force
+#     approach without using regular expressions.
+
+#     Parameters:
+#     -----------
+#     sql_list : list of str
+#         A list of SQL queries (strings).
+
+#     Returns:
+#     --------
+#     list of str
+#         A new list of SQL queries with all 'DISTINCT' keywords removed.
+#     """
+
+#     cleaned_queries = []
+#     for query in sql_list:
+#         tokens = query.split(" ")
+#         filtered_tokens = []
+#         for token in tokens:
+#             # Check if this token is 'distinct' (case-insensitive)
+#             if token.lower() != 'distinct':
+#                 filtered_tokens.append(token)
+#         cleaned_query = ' '.join(filtered_tokens)
+#         cleaned_queries.append(cleaned_query)
+
+#     return cleaned_queries
+
+
 def remove_distinct(sql_list):
     """
     Remove all occurrences of the DISTINCT keyword (in any case form)
-    from a single list of SQL query strings. This is a brute-force
-    approach without using regular expressions.
+    from a single list of SQL query strings, but preserve DISTINCT ON clauses.
+    
+    This function uses regex to:
+    - Remove standalone DISTINCT keywords
+    - Preserve DISTINCT ON (column_list) clauses
+    - Handle case-insensitive matching
 
     Parameters:
     -----------
@@ -173,18 +208,20 @@ def remove_distinct(sql_list):
     Returns:
     --------
     list of str
-        A new list of SQL queries with all 'DISTINCT' keywords removed.
+        A new list of SQL queries with standalone 'DISTINCT' keywords removed.
     """
 
     cleaned_queries = []
     for query in sql_list:
-        tokens = query.split(" ")
-        filtered_tokens = []
-        for token in tokens:
-            # Check if this token is 'distinct' (case-insensitive)
-            if token.lower() != 'distinct':
-                filtered_tokens.append(token)
-        cleaned_query = ' '.join(filtered_tokens)
+        # Pattern to match DISTINCT but not DISTINCT ON
+        # \b ensures word boundaries, so "DISTINCT" matches but "DISTINCTON" doesn't
+        # (?![^()]*\bON\b) negative lookahead ensures we don't match if ON follows
+        # This handles cases like "DISTINCT ON (col1, col2)" - we keep the whole thing
+        pattern = r'\bDISTINCT\b(?![^()]*\bON\b)'
+        cleaned_query = re.sub(pattern, '', query, flags=re.IGNORECASE)
+        
+        # Clean up any extra whitespace that might be left
+        cleaned_query = re.sub(r'\s+', ' ', cleaned_query).strip()
         cleaned_queries.append(cleaned_query)
 
     return cleaned_queries
@@ -385,4 +422,3 @@ def test_case(pred_sqls, sol_sqls, db_name, conn, conditions):
     assert result == 1, f"ex_base returned {result} but expected 1."
     return result
 """
-
