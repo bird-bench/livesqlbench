@@ -45,6 +45,12 @@ Write a file in `/app/pred.json` with **exactly** this JSON:
 - Output format: pred.json
 - You must execute your answer SQL on the database to valiate
 
+## Finishing the Task
+
+- After writing and testing `/app/pred.json`, if your harness exposes a `finish` tool/action, you MUST call that `finish` tool/action to end the session. Do NOT send a conversational message saying you are done instead of using the available finish tool/action.
+- If your harness does not expose a `finish` tool/action, stop after `/app/pred.json` has been written and tested.
+- You have at most 50 steps for this task. If you are nearing the limit, stop exploring, write your best current SQL to `/app/pred.json`, and then use the finish tool/action if it is available.
+
 Now working on this query:
 
 ## Query
