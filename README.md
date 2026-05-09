@@ -288,8 +288,8 @@ More results can be found [here](https://livesqlbench.ai)
 
 - [x] **🔄 LiveSQLBench-Base-Lite:** 18 NEW databases and 270 NEW tasks with straightforward, direct queries. 
 - [x] **🔄 LiveSQLBench-Base-Full:** 22 NEW databases and 600 NEW tasks with more natural, reasoning-intensive user tasks and richer, noisier DB schemas/values.
-- [ ] **🔄 LiveSQLBench-Large-Lite:** Industrial-scale databases with 1340+ columns
-- [ ] **🔄 LiveSQLBench-Large-Full:** Comprehensive large-scale datasets
+- [x] **🔄 LiveSQLBench-Large-v1:** Comprehensive large-scale datasets
+- [ ] **🔄 LiveSQLBench-Base-Full-v2:**  the next release version of LiveSQLBench-Base-Full.
 
 
 ### 📊 Feature Comparison
@@ -306,6 +306,10 @@ More results can be found [here](https://livesqlbench.ai)
 
 
 Want new dialects? Vote for new SQL dialects [🗳️ here](https://docs.google.com/forms/d/e/1FAIpQLSfEogmsA7LObI13KOoiojdnYfW28KEqvEVtC9hXaZJ8O9aCpQ/viewform?usp=header)!
+
+## 📝 Submission Your Model Performance
+
+For instructions on submitting your model performance and make it public in our [leaderboard](https://livesqlbench.ai), please refer to the [LiveSQLBench submission document](https://docs.google.com/document/d/1L6lmhFr_LCn1YLljZtYZxsHDeRSEMK-JNic8c0S_Asc/edit?tab=t.0).
 
 ## Created By:
 BIRD Team & Google Cloud
