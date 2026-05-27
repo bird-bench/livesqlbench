@@ -103,9 +103,10 @@ We currently release three versions:
 **Data viewer**: Explore our data through data viewer in our website [livesqlbench.ai](https://livesqlbench.ai).
 
 🔐 To avoid data leakage by auto-crawling, certain fields (e.g., `sol_sql`, `test_cases`, `external_knowledge`) are excluded from the public dataset `livesqlbench_data.jsonl`. For the full dataset, please email: **[📧 bird.bench25@gmail.com](mailto:bird.bench25@gmail.com)** with subject tag 
-- `[livesqlbench-base-lite GT&Test Cases]` for **livesqlbench-base-lite** version or 
-- `[livesqlbench-base-full-v1 GT&Test Cases]` for **livesqlbench-base-full-v1** version or
-- `[livesqlbench-large-v1 GT&Test Cases]` for **livesqlbench-large-v1** version, which will be sent automatically.
+- `[livesqlbench-base-lite GT&Test Cases]` for **[livesqlbench-base-lite](https://huggingface.co/datasets/birdsql/livesqlbench-base-lite)** version or
+- `[livesqlbench-base-lite-SQLite GT&Test Cases]` for **[livesqlbench-base-lite-SQLite](https://huggingface.co/datasets/birdsql/livesqlbench-base-lite-sqlite)** version or
+- `[livesqlbench-base-full-v1 GT&Test Cases]` for **[livesqlbench-base-full-v1](https://huggingface.co/datasets/birdsql/livesqlbench-base-full-v1)** version or
+- `[livesqlbench-large-v1 GT&Test Cases]` for **[livesqlbench-large-v1](https://huggingface.co/datasets/birdsql/livesqlbench-large-v1)** version, which will be sent automatically.
 
 
 
