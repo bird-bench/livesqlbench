@@ -71,15 +71,24 @@ def api_request(messages, engine, client, backend, **kwargs):
                 return completion.choices[0].message.content
 
             elif backend == "anthropic":
-                message = client.messages.create(
-                    model=engine,
-                    messages=messages,
-                    temperature=kwargs.get("temperature", 0),
-                    max_tokens=kwargs.get("max_tokens", 1024),
-                    top_p=kwargs.get("top_p", 1),
-                    stop_sequences=kwargs.get("stop", None),
-                )
-                return message.content[0].text
+                kwargs_to_use = {
+                    "model": engine,
+                    "messages": messages,
+                    "max_tokens": kwargs.get("max_tokens", 1024),
+                    "stop_sequences": kwargs.get("stop", None),
+                }
+            
+                # Only add temperature/top_p for older models that support them
+                if not any(newer in engine for newer in ["5-5", "opus-5", "sonnet-5"]):
+                    kwargs_to_use["temperature"] = kwargs.get("temperature", 0)
+                    kwargs_to_use["top_p"] = kwargs.get("top_p", 1)
+            
+                message = client.messages.create(**kwargs_to_use)
+                # Avoid a silent failure
+                if message.stop_reason == "max_tokens":
+                    print(f"warning: response truncated at max_tokens ({engine})")
+                # Thinking block responses need to be avoided
+                return "".join(b.text for b in message.content if b.type == "text")
 
             elif backend == "genai":
                 response = client.generate_content(
@@ -134,7 +143,7 @@ def call_api_model(
     elif "claude" in model_name:
         engine = model_name
         client = anthropic.Anthropic(
-            api_key=model_config[model_name],
+            api_key=model_config[model_name]["api_key"],
         )
         backend = "anthropic"
 
