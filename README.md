@@ -170,7 +170,7 @@ We use **docker** to provide a consistent environment for running the benchmark.
    - Downdload the database dumps 
       - [livesqlbench-base-lite](https://drive.google.com/file/d/1QIGQlRKbkqApAOrQXPqFJgUg8rQ7HRRZ/view). Unzip and rename it as `evaluation/postgre_table_dumps`.
       - [livesqlbench-base-full](https://drive.google.com/file/d/1V9SFIWebi27JtaDUAScG1xE9ELbYcWLR/view). Unzip and rename it as `evaluation/postgre_table_dumps_full`.
-      - [livesqlbench-large-v1](https://drive.google.com/file/d/1u1L-SvJtOZGfcIST-dINw8DnGEQDMu6C/view?usp=sharing). Unzip and rename to `evaluation/postgre_table_dumps_large_v1`.
+      - [livesqlbench-large-v1](https://drive.google.com/file/d/1nOY29sTnIvcbiA2Ws7FJHI6-3ia_2VUP/view). Unzip and rename to `evaluation/postgre_table_dumps_large_v1`.
    - Build the environment manually by running `docker-compose.build.yml`.
       ```bash
       cd evaluation

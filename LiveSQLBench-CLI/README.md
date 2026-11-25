@@ -52,7 +52,7 @@ Hugging Face hosts the public task JSONL; **PostgreSQL dump archives** are distr
 |--------|--------------------------|----------------------------------|-----------------------------|
 | Base-Lite | [`birdsql/livesqlbench-base-lite`](https://huggingface.co/datasets/birdsql/livesqlbench-base-lite) | [Download dumps](https://drive.google.com/file/d/1QIGQlRKbkqApAOrQXPqFJgUg8rQ7HRRZ/view) | `data/postgre_table_dumps/` |
 | Base-Full v1 | [`birdsql/livesqlbench-base-full-v1`](https://huggingface.co/datasets/birdsql/livesqlbench-base-full-v1) | [Download dumps](https://drive.google.com/file/d/1V9SFIWebi27JtaDUAScG1xE9ELbYcWLR/view) | `data/postgre_table_dumps_base_full/` |
-| Large-v1 | [`birdsql/livesqlbench-large-v1`](https://huggingface.co/datasets/birdsql/livesqlbench-large-v1) | [Download dumps](https://drive.google.com/file/d/1u1L-SvJtOZGfcIST-dINw8DnGEQDMu6C/view?usp=sharing) | `data/postgre_table_dumps_large/` |
+| Large-v1 | [`birdsql/livesqlbench-large-v1`](https://huggingface.co/datasets/birdsql/livesqlbench-large-v1) | [Download dumps](https://drive.google.com/file/d/1nOY29sTnIvcbiA2Ws7FJHI6-3ia_2VUP/view) | `data/postgre_table_dumps_large/` |
 
 The root README uses paths like `evaluation/postgre_table_dumps`; for this directory, keep the same unzip structure but under `data/…` as in the [layout](#layout) above.
 
